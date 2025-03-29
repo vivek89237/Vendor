@@ -9,5 +9,5 @@
       "~/*": ["*"]
     }
   },
-  "include": ["**/*.ts", "**/*.tsx", ".expo/types/**/*.ts", "expo-env.d.ts", "components/firebase.jsx"]
+  "include": ["**/*.ts", "**/*.tsx", ".expo/types/**/*.ts", "expo-env.d.ts", "components/firebase.jsx", "Screens/ProfileScreen.jsx"]
 }

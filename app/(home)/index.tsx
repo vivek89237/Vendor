@@ -1,9 +1,17 @@
-import App from '../../Screens/App'
+import { View, Text, StyleSheet } from 'react-native';
 
-export default function Home() {
+export default function Tab() {
   return (
-    <>
-     <App />
-    </>
+    <View style={styles.container}>
+      <Text>Tab [Home|Settings]</Text>
+    </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+});

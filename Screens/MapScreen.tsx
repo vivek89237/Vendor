@@ -1,10 +1,10 @@
 import Map from '~/components/Map';
-import BottomSheetComponent from '~/components/BottomSheetComponent';
+import SelectedOrderSheet from '~/components/SelectedOrderSheet';
 export default function MapScreen(){
     return (
         <>
          <Map />
-         <BottomSheetComponent />
+         <SelectedOrderSheet />
         </>
     )
 }
