@@ -2,7 +2,7 @@ import { Session } from '@supabase/supabase-js';
 import { PropsWithChildren, createContext, useContext, useEffect, useState } from 'react';
 import { ActivityIndicator } from 'react-native';
 
-import { supabase } from "~/utils/supabase";
+import { supabase } from "~/utils/supabaseConfig";
 
 type AuthContextType = {
   isAuthenticated: boolean;

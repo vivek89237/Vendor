@@ -1,5 +1,6 @@
 import { LineLayer, ShapeSource } from '@rnmapbox/maps';
 import { Position } from '@rnmapbox/maps/lib/typescript/src/types/Position';
+import { useOrder } from './OrderProvider';
 
 export default function LineRoute({
   coordinates,
@@ -8,6 +9,7 @@ export default function LineRoute({
   coordinates: Position[];
   id?: string;
 }) {
+  const {selectedOrder} = useOrder()
   return (
     <ShapeSource
       id={id}
@@ -20,7 +22,7 @@ export default function LineRoute({
           coordinates,
         },
       }}>
-      <LineLayer
+      {selectedOrder && <LineLayer
         id="exampleLineLayer"
         style={{
           lineColor: '#42E100',
@@ -28,7 +30,7 @@ export default function LineRoute({
           lineJoin: 'round',
           lineWidth: 7,
         }}
-      />
+      />}
     </ShapeSource>
   );
 }

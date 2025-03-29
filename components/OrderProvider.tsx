@@ -1,18 +1,18 @@
 import {PropsWithChildren, createContext, useContext, useState, useEffect} from 'react'
 import * as Location from 'expo-location'
-import { getDirections } from './directions'
+import { getDirections } from '../utils/directions'
 
 const OrderContext = createContext({});
 
 export default function OrderProvider({children} : PropsWithChildren) {
-    const [direction, setDirection] = useState({});
-    const [selectedOrder, setSelectedOrder] = useState({});
+    const [direction, setDirection] = useState(null);
+    const [selectedOrder, setSelectedOrder] = useState(null);
 
     useEffect(()=>{
         const fetchDircections = async ()=>{
             let { status } = await Location.requestForegroundPermissionsAsync();
             if (status !== 'granted') {
-              console.log('Permission to access location was denied');
+              alert("Permission to access location was denied");
               return;
             }
     
@@ -35,6 +35,7 @@ export default function OrderProvider({children} : PropsWithChildren) {
                 selectedOrder,
                 direction, 
                 setSelectedOrder,
+                setDirection,
                 directionCoordinate: direction?.routes?.[0]?.geometry?.coordinates,
                 routeTime: direction?.routes?.[0]?.duration,
                 routeDistance: direction?.routes?.[0]?.distance,

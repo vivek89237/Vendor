@@ -1,26 +1,23 @@
-import {PropsWithChildren, createContext, useContext, useState, useEffect} from 'react';
-// import { getCustomer } from '~/utils/Firebase';
-// import {fetchCustomer} from "~/utils/Supabase";
+import {PropsWithChildren, createContext, useContext, useState, useEffect, useCallback} from 'react';
+import {fetchCustomer} from "~/utils/Supabse";
 import { useAuth } from './AuthProvider';
 
 const CustomerContext = createContext({});
 
-
 export default function CustomerProvider ({children} : PropsWithChildren) {
-    const [customer, setCustomer] = useState({});
+    const [vendor, setVendor] = useState({});
     const {userId} = useAuth();
-    // useEffect(()=>{
-    //   fetchCustomer(userId, setCustomer);
-    // }, [customer])
-    //console.log("customer", customer.Name );
+    
+    useEffect(()=>{
+      fetchCustomer(userId, setVendor);
+    }, [userId])
+
     return (
     <CustomerContext.Provider value ={{
-      customerId: customer?.id,
-      customerName: customer?.Name, 
-      customerContact: customer?.ContactNo, 
-      customerAddress : customer?.Address,  
-      customerImage: customer?.image,
-      customerCoordinates : customer?.coordinates,
+      id: vendor?.id,
+      name: vendor?.name, 
+      contact: vendor?.contact,  
+      image: vendor?.image,
       }}>
         {children}
     </CustomerContext.Provider>

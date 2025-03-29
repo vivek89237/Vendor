@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import Toast from 'react-native-toast-message';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert,AppState } from 'react-native';
 import CountryPicker from 'react-native-country-picker-modal';
-import {supabase} from "../../utils/supabase"
+import {supabase} from "../../utils/supabaseConfig"
 
 AppState.addEventListener('change', (state) => {
     if (state === 'active') {
@@ -84,6 +84,18 @@ export default function Auth() {
           text1: 'Logged in successfully!',
           visibilityTime: 3000
         });
+
+        const user = {
+          id:  data?.user?.id,
+          name: "Name",
+          contact: phoneNumber,
+          image: "https://zfcmfksnxyzfgrbhxsts.supabase.co/storage/v1/object/sign/userdummyimage/customerImage.webp?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1cmwiOiJ1c2VyZHVtbXlpbWFnZS9jdXN0b21lckltYWdlLndlYnAiLCJpYXQiOjE3NDIzMTgxNjYsImV4cCI6MTc3Mzg1NDE2Nn0.KcsjwoUZTWOxcw8M1Kvx-sV4bYMCnoyVvBWgYPUYLzA",
+        }
+       // console.log('User data:', data?.user?.id);
+         const { error } = await supabase.from('Vendors').upsert(user,{onConflict:'id', ignoreDuplicates:true});
+         if (error) {
+           console.error('Error inserting customer:', error);
+         }
       }
     } catch (err) {
       Toast.show({
