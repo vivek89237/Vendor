@@ -18,13 +18,13 @@ export default function Layout() {
           return;
         }
   
-        // Location.watchPositionAsync(
-        //   { accuracy: Location.Accuracy.High, timeInterval: 5000, distanceInterval: 1 },
-        //   (loc) => {
-        //     const { latitude, longitude } = loc.coords;
-        //     updateLocation(latitude, longitude)
-        //   }
-        // );
+        Location.watchPositionAsync(
+          { accuracy: Location.Accuracy.High, timeInterval: 5000, distanceInterval: 1 },
+          (loc) => {
+            const { latitude, longitude } = loc.coords;
+            updateLocation(latitude, longitude)
+          }
+        );
       })();
     }, []);
   return( 
