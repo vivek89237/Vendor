@@ -12,14 +12,13 @@ import {STATUS} from '~/utils/Firebase'
 Mapbox.setAccessToken(process.env.EXPO_PUBLIC_MAPBOX_KEY || '');
 
 const Map = () => {
-  const { selectedOrder, setSelectedOrder, directionCoordinate } = useOrder();
+  const { selectedOrder, setSelectedOrder, directionCoordinate, } = useOrder();
   const { contact } = useCustomer();
   const [orders, setOrders] = useState([]);
   const points = orders?.map(order => point([order.customerCoordinates[0], order.customerCoordinates[1]], { order }));
   const ordersFeatures = featureCollection(points);
   
   const onPointPress = (event) => {
-    console.log("pressed")
     if (event.features[0]?.properties?.order) {
       setSelectedOrder(event.features[0]?.properties?.order);
     }

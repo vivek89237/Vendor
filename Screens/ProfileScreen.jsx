@@ -1,12 +1,13 @@
 import { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, Image, TextInput, Modal, Button, TouchableOpacity } from 'react-native';
+import { Button } from '~/components/Button';
+import { View, Text, StyleSheet, ScrollView, Image, TextInput, Modal, TouchableOpacity } from 'react-native';
 import { List, Divider, Avatar } from 'react-native-paper';
 import { supabase } from '~/utils/supabaseConfig';
 import { useCustomer } from '~/Provider/CustomerProvider';
 
 export default function ProfileScreen() {
 
-  const { image, id, name, contact } = useCustomer();
+  const { image, id, name, contact, status } = useCustomer();
   const [modalVisible, setModalVisible] = useState(false);
   const [fieldToUpdate, setFieldToUpdate] = useState('');
   const [newValue, setNewValue] = useState({
@@ -41,8 +42,15 @@ export default function ProfileScreen() {
       <View style={styles.headerSection}>
         <Avatar.Image size={72} source={{ uri: image }} />
         <View style={styles.profileInfo}>
-          <Text style={styles.profileName}>{name}</Text>
-        </View>
+            <Text style={styles.profileName}>{name}</Text>
+          </View>
+          <View>
+            {status ? 
+              <Button disabled={true} title={"ONLINE"}  style={{ backgroundColor: "#42E100" }} />
+              :
+              <Button disabled={true} title={"OFFLINE"}  style={{ backgroundColor: "#F44336" }} />
+            }
+          </View>
       </View>
 
       <Divider />
@@ -128,6 +136,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     padding: 20,
     backgroundColor: '#1F1F1F',
+    justifyContent:"space-between"
   },
   profileInfo: {
     marginLeft: 15,
@@ -197,5 +206,14 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontWeight: 'bold',
     fontSize: 16,
+  },
+  headContainer:{
+    flexDirection: 'row',
+    justifyContent:'space-between',
+    marginBottom: 20,
+    alignItems: 'center',
+    paddingRight: 10,
+    paddingLeft: 10,
+    width: "80%",
   },
 });
