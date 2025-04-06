@@ -7,7 +7,7 @@ import { supabase } from "~/utils/supabaseConfig";
 type AuthContextType = {
   isAuthenticated: boolean;
   session?: Session | null;
-  userId?: string;
+  userId?: string | undefined;
 };
 
 const AuthContext = createContext<AuthContextType>({

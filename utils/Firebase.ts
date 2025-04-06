@@ -13,6 +13,7 @@ import {
 export const STATUS = {
     PENDING: "Pending",
     ACCEPTED: "Accepted",
+    // PREORDER: "Preorder",
     DELIVERED: "Delivered",
     CANCELLED: "Cancelled",
     REJECTED: "Rejected",
@@ -24,6 +25,7 @@ const Ref = {
     VENDORS: "vendors",
 }
 let ordersRef = collection(firestore, Ref.ORDERS);
+let vendorsRef = collection(firestore, Ref.VENDORS);
 
 interface CartItem {
     id: number;
@@ -75,3 +77,25 @@ export const updateLocation = async (latitude:number, longitude:number) => {
     }
 }
 
+export const fetchInventory = async (vendorContactNo:number, setInventory) =>{
+    try{
+        let inventoryQuery = query(vendorsRef, where('ContactNo','==',vendorContactNo));
+       return onSnapshot(inventoryQuery, (response) =>{   
+            let items = response.docs.map((docs)=>{
+                return docs.data().vegetables
+            })
+            setInventory(items[0]);
+        })
+    }catch(e){
+        return e;
+    }
+}
+
+export const updateVendorStatus = async ( status:boolean) =>{
+    try {
+        const userDocRef = doc(firestore, Ref.VENDORS, "6MAkW7hqob18YFbmKkRb");
+        await updateDoc(userDocRef, { status });
+    } catch (e) {
+        return e;
+    }
+}

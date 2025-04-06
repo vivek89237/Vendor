@@ -7,7 +7,7 @@ const OrderContext = createContext({});
 export default function OrderProvider({children} : PropsWithChildren) {
     const [direction, setDirection] = useState(null);
     const [selectedOrder, setSelectedOrder] = useState(null);
-
+    
     useEffect(()=>{
         const fetchDircections = async ()=>{
             let { status } = await Location.requestForegroundPermissionsAsync();

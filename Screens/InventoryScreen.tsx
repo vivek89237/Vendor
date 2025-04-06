@@ -196,8 +196,6 @@ const InventoryScreen: React.FC = () => {
             vegetables: arrayUnion(vegetableData),
           });
   
-          console.log("Vegetable added successfully to the database");
-  
           // Update local inventory state
           const vegetableToAdd = { ...selectedVegetable, price, unit };
           setInventory([...inventory, vegetableToAdd]);

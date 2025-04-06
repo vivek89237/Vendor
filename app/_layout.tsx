@@ -19,7 +19,7 @@ export default function Layout() {
         }
   
         Location.watchPositionAsync(
-          { accuracy: Location.Accuracy.High, timeInterval: 5000, distanceInterval: 1 },
+          { accuracy: Location.Accuracy.High, timeInterval: 5000, distanceInterval: 5 },
           (loc) => {
             const { latitude, longitude } = loc.coords;
             updateLocation(latitude, longitude)
@@ -32,11 +32,10 @@ export default function Layout() {
       <AuthProvider>
         <CustomerProvider>
           <OrderProvider>
-            <Stack >
+            <Stack>
               <Stack.Screen name='auth' options={{ title: 'GoCart'  }} />
-              <Stack.Screen name='(home)' options={{ title: 'GoCart'  }} />
+              <Stack.Screen name='(home)' options={{headerShown: false}} />
             </Stack>
-            <StatusBar style="dark" />
           </OrderProvider>
         </CustomerProvider>
       </AuthProvider>
