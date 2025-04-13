@@ -13,7 +13,7 @@ Mapbox.setAccessToken(process.env.EXPO_PUBLIC_MAPBOX_KEY || '');
 
 const Map = () => {
   const { selectedOrder, setSelectedOrder, directionCoordinate, } = useOrder();
-  const { contact } = useCustomer();
+  const { contact, id } = useCustomer();
   const [orders, setOrders] = useState([]);
   const points = orders?.map(order => point([order.customerCoordinates[0], order.customerCoordinates[1]], { order }));
   const ordersFeatures = featureCollection(points);
@@ -25,7 +25,7 @@ const Map = () => {
   };
 
   useEffect(() => {
-    getOrders(contact, setOrders, [STATUS.ACCEPTED]);
+    getOrders(id, setOrders, [STATUS.ACCEPTED]);
   }, [selectedOrder]);
 
     return (

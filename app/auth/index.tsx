@@ -1,9 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState,useEffect } from 'react';
 import Toast from 'react-native-toast-message';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert,AppState } from 'react-native';
 import CountryPicker from 'react-native-country-picker-modal';
 import {supabase} from "../../utils/supabaseConfig"
-
+import { getFirestore, doc, setDoc, getDoc } from "firebase/firestore";
+import { firestore } from "../../utils/firebaseConfig";
+import * as Location from 'expo-location';
 AppState.addEventListener('change', (state) => {
     if (state === 'active') {
       supabase.auth.startAutoRefresh();
@@ -20,6 +22,23 @@ export default function Auth() {
   const [isOtpSent, setIsOtpSent] = useState(false);
   const [countryCode, setCountryCode] = useState('IN'); 
   const [callingCode, setCallingCode] = useState('91'); 
+
+
+  const [location, setLocation] = useState(null);
+  const [errorMsg, setErrorMsg] = useState(null);
+
+  useEffect(() => {
+    (async () => {
+      let { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== 'granted') {
+        setErrorMsg('Permission to access location was denied');
+        return;
+      }
+
+      let location = await Location.getCurrentPositionAsync({});
+      setLocation(location?.coords); // latitude & longitude are here
+    })();
+  }, []);
 
   const sendOtp = async () => {
     if (!phoneNumber) {
@@ -85,18 +104,41 @@ export default function Auth() {
           visibilityTime: 3000
         });
 
-        const user = {
-          id:  data?.user?.id,
-          name: "Name",
-          contact: phoneNumber,
-          status: false,
-          image: "https://zfcmfksnxyzfgrbhxsts.supabase.co/storage/v1/object/sign/userdummyimage/customerImage.webp?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1cmwiOiJ1c2VyZHVtbXlpbWFnZS9jdXN0b21lckltYWdlLndlYnAiLCJpYXQiOjE3NDIzMTgxNjYsImV4cCI6MTc3Mzg1NDE2Nn0.KcsjwoUZTWOxcw8M1Kvx-sV4bYMCnoyVvBWgYPUYLzA",
-        }
+        // const user = {
+        //   id:  data?.user?.id,
+        //   name: "Name",
+        //   contact: phoneNumber,
+        //   status: false,
+        //   image: "https://zfcmfksnxyzfgrbhxsts.supabase.co/storage/v1/object/sign/userdummyimage/customerImage.webp?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1cmwiOiJ1c2VyZHVtbXlpbWFnZS9jdXN0b21lckltYWdlLndlYnAiLCJpYXQiOjE3NDIzMTgxNjYsImV4cCI6MTc3Mzg1NDE2Nn0.KcsjwoUZTWOxcw8M1Kvx-sV4bYMCnoyVvBWgYPUYLzA",
+        // }
        // console.log('User data:', data?.user?.id);
-         const { error } = await supabase.from('Vendors').upsert(user,{onConflict:'id', ignoreDuplicates:true});
-         if (error) {
-           console.error('Error inserting customer:', error);
-         }
+       const id = data?.user?.id
+       if(id){
+        const docRef = doc(firestore, "vendors", id);
+        const docSnap = await getDoc(docRef);
+        if (!docSnap.exists()) {
+          await setDoc(docRef, {
+            id:  data?.user?.id,
+            name: "Name",
+            ContactNo: Number(phoneNumber),
+            status: false,
+            image: "https://zfcmfksnxyzfgrbhxsts.supabase.co/storage/v1/object/sign/userdummyimage/customerImage.webp?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1cmwiOiJ1c2VyZHVtbXlpbWFnZS9jdXN0b21lckltYWdlLndlYnAiLCJpYXQiOjE3NDIzMTgxNjYsImV4cCI6MTc3Mzg1NDE2Nn0.KcsjwoUZTWOxcw8M1Kvx-sV4bYMCnoyVvBWgYPUYLzA",
+            latitude: location?.latitude,
+            longitude:location?.longitude,
+            averageRating:0.0,
+            totalDelivery: 0,
+            totalRatings: 0,
+            vegetables: [],
+          });
+          console.log("Document created!");
+        } else {
+          console.log("Document with this ID already exists. Skipping creation.");
+        }
+        // const { error } = await supabase.from('Vendors').upsert(user,{onConflict:'id', ignoreDuplicates:true});
+        // if (error) {
+        //   console.error('Error inserting customer:', error);
+        // }
+       }
       }
     } catch (err) {
       Toast.show({

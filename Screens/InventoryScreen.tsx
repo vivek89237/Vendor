@@ -25,7 +25,7 @@ interface InventoryItem {
 }
 
 const InventoryScreen: React.FC = () => {
-  const {contact} = useCustomer()
+  const {contact, id} = useCustomer()
   const [inventory, setInventory] = useState<InventoryItem[]>([]);
   const [availableVegetables, setAvailableVegetables] = useState<InventoryItem[]>([]);
   const [isModalVisible, setIsModalVisible] = useState(false);
@@ -37,7 +37,7 @@ const InventoryScreen: React.FC = () => {
 
   useEffect(() => {
     const loadInventory = async () => {
-      const vendorQuery = query(collection(firestore, "vendors"), where("ContactNo", "==", contact));
+      const vendorQuery = query(collection(firestore, "vendors"), where("id", "==", id));
       try {
         const querySnapshot = await getDocs(vendorQuery);
         if (!querySnapshot.empty) {
@@ -85,7 +85,7 @@ const InventoryScreen: React.FC = () => {
     try {
       const vendorQuery = query(
         collection(firestore, "vendors"),
-        where("ContactNo", "==", contact)
+        where("id", "==", id)
       );
       const querySnapshot = await getDocs(vendorQuery);
   
@@ -135,7 +135,7 @@ const InventoryScreen: React.FC = () => {
       // Query the 'vendors' collection to find the vendor document
       const vendorQuery = query(
         collection(firestore, "vendors"),
-        where("ContactNo", "==", contact)
+        where("id", "==", id)
       );
       const querySnapshot = await getDocs(vendorQuery);
   
@@ -162,7 +162,7 @@ const InventoryScreen: React.FC = () => {
   const addVegetableToInventory = async () => {
     if (selectedVegetable) {
       setLoading(true); // Start loader
-      const vendorQuery = query(collection(firestore, "vendors"), where("ContactNo", "==", contact));
+      const vendorQuery = query(collection(firestore, "vendors"), where("id", "==", id));
   
       try {
         const querySnapshot = await getDocs(vendorQuery);
@@ -195,7 +195,8 @@ const InventoryScreen: React.FC = () => {
           await updateDoc(vendorDocRef, {
             vegetables: arrayUnion(vegetableData),
           });
-  
+          
+          console.log("vegetable added")
           // Update local inventory state
           const vegetableToAdd = { ...selectedVegetable, price, unit };
           setInventory([...inventory, vegetableToAdd]);
