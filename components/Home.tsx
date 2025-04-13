@@ -30,12 +30,12 @@ const Home = () => {
 
     useFocusEffect(
       useCallback(() => {
-        fetchInventory(contact, setInventory)
+        fetchInventory(id, setInventory)
       }, [inventory, contact])
     )
     useFocusEffect(
       useCallback(() => {
-        getOrders(contact, setOrders, [STATUS.ACCEPTED, STATUS.CANCELLED, STATUS.DELIVERED, STATUS.PENDING, STATUS.REJECTED])
+        getOrders(id, setOrders, [STATUS.ACCEPTED, STATUS.CANCELLED, STATUS.DELIVERED, STATUS.PENDING, STATUS.REJECTED])
       }, [orders, contact])
     )
 
@@ -68,22 +68,18 @@ const Home = () => {
             {status ? 
                 <Button  title={"ONLINE"}  style={{ backgroundColor: "#42E100", width:100 }}
                     onLongPress={async ()=>(  
-                      await Promise.all([
-                        updateCustomer(id, false),
-                        updateVendorStatus(false),
-                      ]),
-                      
-                        ToastAndroid.show('The Staus has been updated to OFFLINE', ToastAndroid.LONG)
+                        //updateCustomer(id, false),
+                        await updateVendorStatus(id, false),
+                        ToastAndroid.show('The Staus has been updated to OFFLINE', ToastAndroid.SHORT)
                     )}
                 />
                   :
                 <Button  title={"OFFLINE"}  style={{ backgroundColor: "#F44336", width:100 }}
                     onLongPress={async()=>(
-                      await Promise.all([
-                        updateCustomer(id, true),
-                        updateVendorStatus(true),
-                      ]),
-                        ToastAndroid.show('The Staus has been updated to ONLINE', ToastAndroid.LONG)
+
+                       // updateCustomer(id, true),
+                       await updateVendorStatus(id, true),
+                        ToastAndroid.show('The Staus has been updated to ONLINE', ToastAndroid.SHORT)
                     )}
                 />
                 }

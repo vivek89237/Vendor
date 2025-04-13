@@ -45,9 +45,9 @@ interface Order {
     vendorContactNo: number;
   }
   
-export const getOrders = async (vendorContactNo: number, setOrders, status:string[]) =>{
+export const getOrders = async (id: string, setOrders, status:string[]) =>{
     try{
-        let ordersQuery = query(ordersRef,  where('status','in', status), where('vendorContactNo','==',vendorContactNo));
+        let ordersQuery = query(ordersRef,  where('status','in', status), where('id','==',id));
         onSnapshot(ordersQuery, (response) =>{   
             let orders = response.docs.map((docs)=>{
                 return {...docs.data(), id: docs.id};
@@ -68,18 +68,18 @@ export const updateStatus = async (id: string,  status: string) => {
     }
 }
 
-export const updateLocation = async (latitude:number, longitude:number) => {
+export const updateLocation = async (latitude:number, longitude:number, id:string) => {
     try { 
-        const userDocRef = doc(firestore, "vendors", "6MAkW7hqob18YFbmKkRb");
+        const userDocRef = doc(firestore, "vendors", id);
         await updateDoc(userDocRef, { latitude, longitude});
     } catch (e) {
         return e;
     }
 }
 
-export const fetchInventory = async (vendorContactNo:number, setInventory) =>{
+export const fetchInventory = async (id:string, setInventory) =>{
     try{
-        let inventoryQuery = query(vendorsRef, where('ContactNo','==',vendorContactNo));
+        let inventoryQuery = query(vendorsRef, where('id','==',id));
        return onSnapshot(inventoryQuery, (response) =>{   
             let items = response.docs.map((docs)=>{
                 return docs.data().vegetables
@@ -91,11 +91,25 @@ export const fetchInventory = async (vendorContactNo:number, setInventory) =>{
     }
 }
 
-export const updateVendorStatus = async ( status:boolean) =>{
+export const updateVendorStatus = async (id: string, status:boolean) =>{
     try {
-        const userDocRef = doc(firestore, Ref.VENDORS, "6MAkW7hqob18YFbmKkRb");
+        const userDocRef = doc(firestore, Ref.VENDORS, id);
         await updateDoc(userDocRef, { status });
     } catch (e) {
+        return e;
+    }
+}
+
+export const fetchCustomer = async (id:string, setVendors)=>{
+    try{
+        const userDocRef = query(vendorsRef, where('id','==',id));
+        onSnapshot(userDocRef, (response) =>{   
+            let orders = response?.docs?.map((docs)=>{
+                return docs.data();
+            });
+            setVendors(orders[0]);
+        })
+    }catch(e){
         return e;
     }
 }

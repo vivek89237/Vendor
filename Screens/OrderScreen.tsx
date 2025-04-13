@@ -34,11 +34,11 @@ const OrderScreen: React.FC = () => {
   const [orders, setOrders] = useState<Order[]>([]);
   const [filteredOrders, setFilteredOrders] = useState<Order[]>([]);
   const [selectedStatus, setSelectedStatus] = useState<string>(STATUS.PENDING);
-  const { contact } = useCustomer();
+  const { contact, id } = useCustomer();
 
   useEffect(() => {
     const fetchOrders = async () => {
-      await getOrders(contact, setOrders, [
+      await getOrders(id, setOrders, [
         STATUS.ACCEPTED,
         STATUS.CANCELLED,
         STATUS.DELIVERED,
