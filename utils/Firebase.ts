@@ -13,7 +13,6 @@ import {
 export const STATUS = {
     PENDING: "Pending",
     ACCEPTED: "Accepted",
-    // PREORDER: "Preorder",
     DELIVERED: "Delivered",
     CANCELLED: "Cancelled",
     REJECTED: "Rejected",
@@ -44,6 +43,13 @@ interface Order {
     total: number;
     vendorContactNo: number;
   }
+
+interface Vendor{
+    id?: string,
+    name?: string,
+    ContactNo: number,
+    image: string,
+}
   
 export const getOrders = async (id: string, setOrders, status:string[]) =>{
     try{
@@ -112,4 +118,13 @@ export const fetchCustomer = async (id:string, setVendors)=>{
     }catch(e){
         return e;
     }
+}
+
+export const updateVendor = async (id: string, data: any) =>{
+    try {
+        const orderRef = doc(firestore, Ref.VENDORS, id); 
+        await updateDoc( orderRef, data );
+      } catch (e) { 
+        return e;
+      }
 }

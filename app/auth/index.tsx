@@ -1,9 +1,9 @@
 import React, { useState,useEffect } from 'react';
 import Toast from 'react-native-toast-message';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert,AppState } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, ToastAndroid, StyleSheet, Alert,AppState } from 'react-native';
 import CountryPicker from 'react-native-country-picker-modal';
 import {supabase} from "../../utils/supabaseConfig"
-import { getFirestore, doc, setDoc, getDoc } from "firebase/firestore";
+import { doc, setDoc, getDoc } from "firebase/firestore";
 import { firestore } from "../../utils/firebaseConfig";
 import * as Location from 'expo-location';
 AppState.addEventListener('change', (state) => {
@@ -25,13 +25,15 @@ export default function Auth() {
 
 
   const [location, setLocation] = useState(null);
-  const [errorMsg, setErrorMsg] = useState(null);
 
   useEffect(() => {
     (async () => {
       let { status } = await Location.requestForegroundPermissionsAsync();
       if (status !== 'granted') {
-        setErrorMsg('Permission to access location was denied');
+        ToastAndroid.show(
+          'Permission to access location was denied',
+          ToastAndroid.SHORT
+        )
         return;
       }
 
@@ -42,44 +44,44 @@ export default function Auth() {
 
   const sendOtp = async () => {
     if (!phoneNumber) {
-      Toast.show({
-        type: 'error', 
-        text1: 'Please enter a valid phone number.',
-      });
+      ToastAndroid.show(
+        'Please enter a valid phone number.',
+        ToastAndroid.SHORT
+      )
       return;
     }
 
     const fullPhoneNumber = `+${callingCode}${phoneNumber}`;
 
     try {
+
       const { error } = await supabase.auth.signInWithOtp({ phone: fullPhoneNumber });
       if (error) {
-        Toast.show({
-          type: 'error',
-          text1: 'Please enter the OTP.',
-        });
+        ToastAndroid.show(
+          error.message,
+          ToastAndroid.SHORT
+        )
       } else {
         setIsOtpSent(true);
-        Toast.show({
-          type: 'success', 
-          text1: 'OTP has been sent to your phone.',
-          visibilityTime: 3000
-        });
+        ToastAndroid.show(
+          'OTP has been sent to your phone.',
+          ToastAndroid.SHORT
+        )
       }
     } catch (err) {
-      Toast.show({
-        type: 'error', 
-        text1: 'An unexpected error occurred. Please try again later.',
-      });
+      ToastAndroid.show(
+        'An unexpected error occurred. Please try again later.',
+        ToastAndroid.SHORT
+      )
     }
   };
 
   const verifyOtp = async () => {
     if (!otp) {
-      Toast.show({
-        type: 'error', 
-        text1: 'Please enter the OTP.',
-      });
+      ToastAndroid.show(
+        'Please enter the OTP.',
+        ToastAndroid.SHORT
+      )
       return;
     }
 
@@ -93,16 +95,15 @@ export default function Auth() {
       });
 
       if (error) {
-        Toast.show({
-          type: 'error',
-          text1: error.message,
-        });
+        ToastAndroid.show(
+          error.message,
+          ToastAndroid.SHORT
+        )
       } else {
-        Toast.show({
-          type: 'success',
-          text1: 'Logged in successfully!',
-          visibilityTime: 3000
-        });
+        ToastAndroid.show(
+          'Logged in successfully!',
+          ToastAndroid.SHORT
+        )
 
         // const user = {
         //   id:  data?.user?.id,
@@ -141,10 +142,10 @@ export default function Auth() {
        }
       }
     } catch (err) {
-      Toast.show({
-        type: 'error',
-        text1: 'An unexpected error occurred. Please try again later.',
-      });
+      ToastAndroid.show(
+        'An unexpected error occurred. Please try again later.',
+        ToastAndroid.SHORT
+      )
     }
   };
 

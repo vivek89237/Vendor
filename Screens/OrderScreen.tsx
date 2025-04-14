@@ -6,6 +6,7 @@ import {
   FlatList,
   StyleSheet,
   TouchableOpacity,
+  ScrollView
 } from "react-native";
 import { getOrders, STATUS, updateStatus } from "~/utils/Firebase";
 import { useCustomer } from "~/Provider/CustomerProvider";
@@ -17,6 +18,7 @@ interface CartItem {
   name: string;
   price: string;
   quantity: number;
+  unit?: string
 }
 
 interface Order {
@@ -44,10 +46,11 @@ const OrderScreen: React.FC = () => {
         STATUS.DELIVERED,
         STATUS.PENDING,
         STATUS.REJECTED,
+        
       ]);
     };
     fetchOrders();
-  }, [contact]);
+  }, []);
 
   useEffect(() => {
     setFilteredOrders(orders.filter((order) => order.status === selectedStatus));
@@ -63,7 +66,16 @@ const OrderScreen: React.FC = () => {
       <Text style={styles.text}><Text style={styles.boldText}>Location:</Text> {item.location}</Text>
       <Text style={styles.text}><Text style={styles.boldText}>Date:</Text> {item.date}</Text>
       <Text style={styles.totalPrice}>₹{item.total}</Text>
-
+      <View>
+      <ScrollView style={styles.itemsContainer}>
+          <Text style={styles.sectionTitle}>Order Items:</Text>
+          {item?.cart?.map((orderItem, index) => (
+            <Text key={index} style={styles.itemText}>
+              {orderItem.quantity} Kg {orderItem.name}
+            </Text>
+          ))}
+        </ScrollView>
+      </View>
       {item.status === STATUS.PENDING && (
         <View style={styles.buttonContainer}>
           <Button title="Accept" onPress={() => updateStatus(item.id, STATUS.ACCEPTED)} style={{backgroundColor:"#1F7D53"}} />
@@ -143,6 +155,19 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: "bold",
     color: "#fff",
+  },
+  itemsContainer: {
+    maxHeight: 150,
+    marginBottom: 8,
+  },
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 8,
+  },
+  itemText: {
+    fontSize: 16,
+    marginBottom: 4,
   },
   orderContainer: {
     backgroundColor: "#F7F7F7",

@@ -4,6 +4,7 @@ import { View, Text, StyleSheet, ScrollView, Image, TextInput, Modal, TouchableO
 import { List, Divider, Avatar } from 'react-native-paper';
 import { supabase } from '~/utils/supabaseConfig';
 import { useCustomer } from '~/Provider/CustomerProvider';
+import { updateVendor } from '~/utils/Firebase';
 
 export default function ProfileScreen() {
 
@@ -19,18 +20,14 @@ export default function ProfileScreen() {
   const handleUpdate = async () => {
     setModalVisible(false);
     try {
-      let updateData = {};
-      updateData[fieldToUpdate] = newValue;
-
-      const { error } = await supabase
-        .from('Vendors') 
-        .update(updateData)
-        .eq('id', id); 
-
-      if (error) {
-        console.error('Error updating:', error.message);
-        return;
+      if(fieldToUpdate === 'name'){
+        await updateVendor(id, { name })
       }
+     
+      if(fieldToUpdate === 'contact'){
+        await updateVendor(id, {ContactNo: Number(contact)})
+      }
+      
       setFieldToUpdate('');
     } catch (err) {
       console.error('Error:', err.message);
@@ -62,7 +59,7 @@ export default function ProfileScreen() {
             description="Update name"
             left={() => <List.Icon icon="account" />}
             onPress={() => {
-              setNewValue(name);
+              setNewValue(name)
               setFieldToUpdate('name');
               setModalVisible(true);
             }}
