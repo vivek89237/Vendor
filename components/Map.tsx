@@ -15,9 +15,11 @@ const Map = () => {
   const { selectedOrder, setSelectedOrder, directionCoordinate, } = useOrder();
   const { contact, id } = useCustomer();
   const [orders, setOrders] = useState([]);
-  const points = orders?.map(order => point([order.customerCoordinates[0], order.customerCoordinates[1]], { order }));
-  const ordersFeatures = featureCollection(points);
+  const currentDate = new Date();
+  const formattedDate = currentDate.toLocaleDateString('en-GB').split('/').join('-');
   
+  const points = orders?.map(order => point([order.customerCoordinates[1], order.customerCoordinates[0]], { order }));
+  const ordersFeatures = featureCollection(points);
   const onPointPress = (event) => {
     if (event.features[0]?.properties?.order) {
       setSelectedOrder(event.features[0]?.properties?.order);
@@ -26,7 +28,7 @@ const Map = () => {
 
   useEffect(() => {
     getOrders(id, setOrders, [STATUS.ACCEPTED]);
-  }, [selectedOrder]);
+  }, [orders]);
 
     return (
       <View style={styles.container}>

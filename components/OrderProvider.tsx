@@ -20,7 +20,7 @@ export default function OrderProvider({children} : PropsWithChildren) {
     
             const newDirection = await getDirections(
               [myLocation.coords.longitude, myLocation.coords.latitude],
-              [selectedOrder?.customerCoordinates[0], selectedOrder?.customerCoordinates[1]]
+              [selectedOrder?.customerCoordinates[1], selectedOrder?.customerCoordinates[0]]
             );
             setDirection(newDirection);
           };
