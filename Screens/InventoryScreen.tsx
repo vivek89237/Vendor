@@ -15,6 +15,7 @@ import { Button } from '~/components/Button'
 import { firestore } from "../utils/firebaseConfig";
 import { collection, query, where, getDocs, updateDoc, arrayUnion, onSnapshot } from "firebase/firestore";
 import { useCustomer } from '~/Provider/CustomerProvider';
+import { useAuth } from '~/Provider/AuthProvider';
 
 interface InventoryItem {
   id: string;
@@ -25,7 +26,8 @@ interface InventoryItem {
 }
 
 const InventoryScreen: React.FC = () => {
-  const {contact, id} = useCustomer()
+  // const {contact, id} = useCustomer()
+  const { userId: id } = useAuth()
   const [inventory, setInventory] = useState<InventoryItem[]>([]);
   const [availableVegetables, setAvailableVegetables] = useState<InventoryItem[]>([]);
   const [isModalVisible, setIsModalVisible] = useState(false);
@@ -75,10 +77,10 @@ const InventoryScreen: React.FC = () => {
     item.vegetable.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  const updatePrice = async (id: string, newPrice: string) => {
+  const updatePrice = async (vegId: string, newPrice: string) => {
     setInventory((prevInventory) =>
       prevInventory.map((item) =>
-        item.id === id ? { ...item, price: newPrice } : item
+        item.id === vegId ? { ...item, price: newPrice } : item
       )
     );
   
@@ -95,7 +97,7 @@ const InventoryScreen: React.FC = () => {
         // Get the current vegetables array from Firestore
         const vendorData = querySnapshot.docs[0].data();
         const updatedVegetables = vendorData.vegetables.map((veg: any) =>
-          veg.id === id ? { ...veg, price: newPrice } : veg
+          veg.id === vegId ? { ...veg, price: newPrice } : veg
         );
   
         // Update the database with the new vegetables array
