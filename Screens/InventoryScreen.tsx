@@ -109,7 +109,7 @@ const InventoryScreen: React.FC = () => {
     }
   };
 
-  const confirmRemoveVegetable = (id: string) => {
+  const confirmRemoveVegetable = (vegId: string) => {
     Alert.alert(
       "Confirm Removal",
       "Are you sure you want to remove this vegetable from your inventory?",
@@ -120,15 +120,15 @@ const InventoryScreen: React.FC = () => {
         },
         {
           text: "Yes",
-          onPress: () => removeVegetable(id)
+          onPress: () => removeVegetable(vegId)
         }
       ]
     );
   };
   
-  const removeVegetable = async (id: string) => {
+  const removeVegetable = async (vegId: string) => {
     setInventory((prevInventory) =>
-      prevInventory.filter((item) => item.id !== id)
+      prevInventory.filter((item) => item.id !== vegId)
     );
   
     try {
@@ -145,7 +145,7 @@ const InventoryScreen: React.FC = () => {
         // Get the current vegetables array from Firestore
         const vendorData = querySnapshot.docs[0].data();
         const updatedVegetables = vendorData.vegetables.filter(
-          (veg: any) => veg.id !== id
+          (veg: any) => veg.id !== vegId
         );
   
         // Update the database with the new vegetables array
