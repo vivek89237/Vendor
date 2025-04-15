@@ -12,6 +12,7 @@ import { getOrders, STATUS, updateStatus } from "~/utils/Firebase";
 import { useCustomer } from "~/Provider/CustomerProvider";
 import OrderStatusDropdown from '~/components/OrderStatusDropdown '
 import {Button} from '~/components/Button'
+import { useAuth } from "~/Provider/AuthProvider";
 
 interface CartItem {
   id: number;
@@ -36,7 +37,7 @@ const OrderScreen: React.FC = () => {
   const [orders, setOrders] = useState<Order[]>([]);
   const [filteredOrders, setFilteredOrders] = useState<Order[]>([]);
   const [selectedStatus, setSelectedStatus] = useState<string>(STATUS.PENDING);
-  const { contact, id } = useCustomer();
+  const {userId: id} = useAuth()
 
   useEffect(() => {
     const fetchOrders = async () => {

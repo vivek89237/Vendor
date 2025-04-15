@@ -30,14 +30,14 @@ export default function Layout() {
   return( 
     <GestureHandlerRootView>
       <AuthProvider>
-        <CustomerProvider>
+        {/* <CustomerProvider> */}
           <OrderProvider>
             <Stack>
               <Stack.Screen name='auth' options={{ title: 'GoCart'  }} />
               <Stack.Screen name='(home)' options={{headerShown: false}} />
             </Stack>
           </OrderProvider>
-        </CustomerProvider>
+        {/* </CustomerProvider> */}
       </AuthProvider>
     </GestureHandlerRootView>
  );

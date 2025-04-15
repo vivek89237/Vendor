@@ -8,12 +8,13 @@ import { useOrder } from './OrderProvider'
 import { useCustomer } from '~/Provider/CustomerProvider';
 import { getOrders } from '~/utils/Firebase'
 import {STATUS} from '~/utils/Firebase'
+import { useAuth } from '~/Provider/AuthProvider';
 
 Mapbox.setAccessToken(process.env.EXPO_PUBLIC_MAPBOX_KEY || '');
 
 const Map = () => {
   const { selectedOrder, setSelectedOrder, directionCoordinate, } = useOrder();
-  const { contact, id } = useCustomer();
+  const {userId:id } = useAuth()
   const [orders, setOrders] = useState([]);
   const currentDate = new Date();
   const formattedDate = currentDate.toLocaleDateString('en-GB').split('/').join('-');
@@ -28,7 +29,7 @@ const Map = () => {
 
   useEffect(() => {
     getOrders(id, setOrders, [STATUS.ACCEPTED]);
-  }, [orders]);
+  }, []);
 
     return (
       <View style={styles.container}>
@@ -37,7 +38,7 @@ const Map = () => {
           <Camera followZoomLevel={10} followUserLocation />
           <LocationPuck puckBearingEnabled puckBearing="heading" pulsing={{ isEnabled: true }} />
           <ShowOrder onPointPress={onPointPress} ordersFeatures={ordersFeatures} />
-          {directionCoordinate && selectedOrder && <LineRoute coordinates={directionCoordinate} />}
+          {directionCoordinate && selectedOrder?.status === STATUS.ACCEPTED && <LineRoute coordinates={directionCoordinate} />}
         </MapView>
       </View>
     );

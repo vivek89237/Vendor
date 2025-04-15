@@ -8,12 +8,19 @@ import { updateCustomer } from '~/utils/Supabse';
 import { fetchInventory, getOrders } from '~/utils/Firebase'
 import { STATUS, updateVendorStatus } from "~/utils/Firebase";
 import{ Feather, FontAwesome, MaterialIcons, Entypo, FontAwesome5, AntDesign } from '@expo/vector-icons';
+import { useAuth } from '~/Provider/AuthProvider';
 
 enum TabType{
   INVENTORY='inventory',
   CHARTS='charts',
   ORDERS ='orders',
 }
+
+const image= "https://zfcmfksnxyzfgrbhxsts.supabase.co/storage/v1/object/sign/userdummyimage/customerImage.webp?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1cmwiOiJ1c2VyZHVtbXlpbWFnZS9jdXN0b21lckltYWdlLndlYnAiLCJpYXQiOjE3NDIzMTgxNjYsImV4cCI6MTc3Mzg1NDE2Nn0.KcsjwoUZTWOxcw8M1Kvx-sV4bYMCnoyVvBWgYPUYLzA"
+
+
+
+const status=true
 
 const myMap = new Map<string, string>();
 myMap.set(STATUS.ACCEPTED, 'smile-circle');
@@ -23,7 +30,7 @@ myMap.set(STATUS.CANCELLED, 'meho');
 myMap.set(STATUS.REJECTED, 'frown');
 
 const Home = () => {
-    const { image, status, id, contact, name } = useCustomer();
+    const { userId: id } = useAuth()
     const [ orders, setOrders ] = useState(null)
     const [inventory, setInventory] = useState([]);
     const [tab, setTab] = useState('inventory');
@@ -31,16 +38,16 @@ const Home = () => {
     useFocusEffect(
       useCallback(() => {
         fetchInventory(id, setInventory)
-      }, [inventory, contact])
+      }, [inventory])
     )
     useFocusEffect(
       useCallback(() => {
         getOrders(id, setOrders, [STATUS.ACCEPTED, STATUS.CANCELLED, STATUS.DELIVERED, STATUS.PENDING, STATUS.REJECTED])
-      }, [orders, contact])
+      }, [orders])
     )
 
     const getCount = (type:string) =>{
-     const filteredOrders = orders.filter(item => {
+     const filteredOrders = orders?.filter(item => {
         return item?.status === type
       })
       return filteredOrders.length;

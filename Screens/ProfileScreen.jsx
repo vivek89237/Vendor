@@ -1,21 +1,36 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Button } from '~/components/Button';
 import { View, Text, StyleSheet, ScrollView, Image, TextInput, Modal, TouchableOpacity } from 'react-native';
 import { List, Divider, Avatar } from 'react-native-paper';
 import { supabase } from '~/utils/supabaseConfig';
 import { useCustomer } from '~/Provider/CustomerProvider';
 import { updateVendor } from '~/utils/Firebase';
+import { useAuth } from '~/Provider/AuthProvider';
+import { fetchCustomer } from '~/utils/Firebase';
 
+const name = "Shyaam"
+const contact = 8349755537
+const image="https://zfcmfksnxyzfgrbhxsts.supabase.co/storage/v1/object/sign/userdummyimage/customerImage.webp?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1cmwiOiJ1c2VyZHVtbXlpbWFnZS9jdXN0b21lckltYWdlLndlYnAiLCJpYXQiOjE3NDIzMTgxNjYsImV4cCI6MTc3Mzg1NDE2Nn0.KcsjwoUZTWOxcw8M1Kvx-sV4bYMCnoyVvBWgYPUYLzA"
+const status = false
 export default function ProfileScreen() {
-
-  const { image, id, name, contact, status } = useCustomer();
+  const { userId: id } = useAuth()
   const [modalVisible, setModalVisible] = useState(false);
   const [fieldToUpdate, setFieldToUpdate] = useState('');
+  // const [vendor, setVendor ] = useState({
+  //   name:"",
+  //   contact:8349755537,
+  //   ,
+    
+  // })
   const [newValue, setNewValue] = useState({
     contact: contact,
     image: image,
     name: name
   });
+
+  // useEffect(()=>{
+  //   fetchCustomer(id, setVendor)
+  // }, [])
 
   const handleUpdate = async () => {
     setModalVisible(false);
