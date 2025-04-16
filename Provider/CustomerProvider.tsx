@@ -20,7 +20,7 @@ export default function CustomerProvider ({children} : PropsWithChildren) {
       if(userId){
         fetchCustomer(userId, setVendor);
       }
-    }, [userId,vendor])
+    }, [])
     return (
     <CustomerContext.Provider value ={{
       id: vendor?.id,
