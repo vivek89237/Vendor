@@ -8,10 +8,6 @@ import { updateVendor } from '~/utils/Firebase';
 import { useAuth } from '~/Provider/AuthProvider';
 import { fetchCustomer } from '~/utils/Firebase';
 
-const name = "Shyaam"
-const contact = 8349755537
-const image="https://zfcmfksnxyzfgrbhxsts.supabase.co/storage/v1/object/sign/userdummyimage/customerImage.webp?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1cmwiOiJ1c2VyZHVtbXlpbWFnZS9jdXN0b21lckltYWdlLndlYnAiLCJpYXQiOjE3NDIzMTgxNjYsImV4cCI6MTc3Mzg1NDE2Nn0.KcsjwoUZTWOxcw8M1Kvx-sV4bYMCnoyVvBWgYPUYLzA"
-const status = false
 export default function ProfileScreen() {
   const { userId: id } = useAuth()
   const [modalVisible, setModalVisible] = useState(false);
@@ -19,28 +15,30 @@ export default function ProfileScreen() {
   // const [vendor, setVendor ] = useState({
   //   name:"",
   //   contact:8349755537,
-  //   ,
-    
+  //   image:"https://zfcmfksnxyzfgrbhxsts.supabase.co/storage/v1/object/sign/userdummyimage/customerImage.webp?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1cmwiOiJ1c2VyZHVtbXlpbWFnZS9jdXN0b21lckltYWdlLndlYnAiLCJpYXQiOjE3NDIzMTgxNjYsImV4cCI6MTc3Mzg1NDE2Nn0.KcsjwoUZTWOxcw8M1Kvx-sV4bYMCnoyVvBWgYPUYLzA",
+  //   status:false,
   // })
+  const [vendor, setVendor ] = useState({})
+
   const [newValue, setNewValue] = useState({
-    contact: contact,
-    image: image,
-    name: name
+    contact: vendor?.ContactNo,
+    image: vendor?.image,
+    name: vendor?.name
   });
 
-  // useEffect(()=>{
-  //   fetchCustomer(id, setVendor)
-  // }, [])
+  useEffect(()=>{
+    fetchCustomer(id, setVendor)
+  }, [])
 
   const handleUpdate = async () => {
     setModalVisible(false);
     try {
       if(fieldToUpdate === 'name'){
-        await updateVendor(id, { name })
+        await updateVendor(id, { name:vendor?.name })
       }
      
       if(fieldToUpdate === 'contact'){
-        await updateVendor(id, {ContactNo: Number(contact)})
+        await updateVendor(id, {ContactNo: Number(vendor?.ContactNo)})
       }
       
       setFieldToUpdate('');
@@ -52,12 +50,12 @@ export default function ProfileScreen() {
   return (
     <ScrollView style={styles.container}>
       <View style={styles.headerSection}>
-        <Avatar.Image size={72} source={{ uri: image }} />
+        <Avatar.Image size={72} source={{ uri: vendor?.image }} />
         <View style={styles.profileInfo}>
-            <Text style={styles.profileName}>{name}</Text>
+            <Text style={styles.profileName}>{vendor?.name}</Text>
           </View>
           <View>
-            {status ? 
+            {vendor?.status ? 
               <Button disabled={true} title={"ONLINE"}  style={{ backgroundColor: "#42E100" }} />
               :
               <Button disabled={true} title={"OFFLINE"}  style={{ backgroundColor: "#F44336" }} />
@@ -70,7 +68,7 @@ export default function ProfileScreen() {
       <View style={styles.list}>
         <List.Section>
           <List.Item
-            title={name}
+            title={vendor?.name}
             description="Update name"
             left={() => <List.Icon icon="account" />}
             onPress={() => {
@@ -81,7 +79,7 @@ export default function ProfileScreen() {
           />
           <Divider />
           <List.Item
-            title={contact}
+            title={vendor?.ContactNo}
             description="Update number"
             left={() => <List.Icon icon="phone" />}
             onPress={() => {
