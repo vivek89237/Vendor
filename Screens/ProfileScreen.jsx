@@ -1,23 +1,18 @@
 import { useEffect, useState } from 'react';
 import { Button } from '~/components/Button';
-import { View, Text, StyleSheet, ScrollView, Image, TextInput, Modal, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, Switch, Image, TextInput, Modal, TouchableOpacity } from 'react-native';
 import { List, Divider, Avatar } from 'react-native-paper';
 import { supabase } from '~/utils/supabaseConfig';
 import { useCustomer } from '~/Provider/CustomerProvider';
 import { updateVendor } from '~/utils/Firebase';
 import { useAuth } from '~/Provider/AuthProvider';
-import { fetchCustomer } from '~/utils/Firebase';
+import { updateVendorStatus, fetchCustomer } from '~/utils/Firebase';
 
 export default function ProfileScreen() {
   const { userId: id } = useAuth()
   const [modalVisible, setModalVisible] = useState(false);
   const [fieldToUpdate, setFieldToUpdate] = useState('');
-  // const [vendor, setVendor ] = useState({
-  //   name:"",
-  //   contact:8349755537,
-  //   image:"https://zfcmfksnxyzfgrbhxsts.supabase.co/storage/v1/object/sign/userdummyimage/customerImage.webp?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1cmwiOiJ1c2VyZHVtbXlpbWFnZS9jdXN0b21lckltYWdlLndlYnAiLCJpYXQiOjE3NDIzMTgxNjYsImV4cCI6MTc3Mzg1NDE2Nn0.KcsjwoUZTWOxcw8M1Kvx-sV4bYMCnoyVvBWgYPUYLzA",
-  //   status:false,
-  // })
+
   const [vendor, setVendor ] = useState({})
 
   const [newValue, setNewValue] = useState('');
@@ -49,14 +44,27 @@ export default function ProfileScreen() {
         <Avatar.Image size={72} source={{ uri: vendor?.image }} />
         <View style={styles.profileInfo}>
             <Text style={styles.profileName}>{vendor?.name}</Text>
-          </View>
-          <View>
-            {vendor?.status ? 
-              <Button disabled={true} title={"ONLINE"}  style={{ backgroundColor: "#42E100" }} />
-              :
-              <Button disabled={true} title={"OFFLINE"}  style={{ backgroundColor: "#F44336" }} />
-            }
-          </View>
+        </View>
+            <View>
+              {vendor?.status ? 
+                  <Button  title={"ONLINE"}  style={{ backgroundColor: "#42E100", width:100 }}
+                      onLongPress={async ()=>(  
+                          //updateCustomer(id, false),
+                          await updateVendorStatus(id, false),
+                          ToastAndroid.show('The Staus has been updated to OFFLINE', ToastAndroid.SHORT)
+                      )}
+                  />
+                    :
+                  <Button  title={"OFFLINE"}  style={{ backgroundColor: "#F44336", width:100 }}
+                      onLongPress={async()=>(
+
+                        // updateCustomer(id, true),
+                        await updateVendorStatus(id, true),
+                          ToastAndroid.show('The Staus has been updated to ONLINE', ToastAndroid.SHORT)
+                      )}
+                  />
+                  }
+            </View>
       </View>
 
       <Divider />

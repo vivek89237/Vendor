@@ -1,6 +1,8 @@
 import { useState, useEffect, useCallback } from 'react' 
 import { useFocusEffect } from 'expo-router';
-import { StyleSheet, Text, View, ToastAndroid, ScrollView, TouchableOpacity } from 'react-native'
+import { StyleSheet, Text, View, Switch, ToastAndroid, ScrollView, TouchableOpacity } from 'react-native'
+
+
 import { List, Divider, Avatar } from 'react-native-paper';
 import { useCustomer } from '~/Provider/CustomerProvider';
 import { Button } from './Button';
@@ -20,7 +22,7 @@ const image= "https://zfcmfksnxyzfgrbhxsts.supabase.co/storage/v1/object/sign/us
 
 
 
-const status=true
+const {status}=true;
 
 const myMap = new Map<string, string>();
 myMap.set(STATUS.ACCEPTED, 'smile-circle');
@@ -68,29 +70,10 @@ const Home = () => {
     <View style={styles.container}>
         <View style={styles.headerSection}>
             <Avatar.Image size={60} source={{ uri: image }} />
-            <View style={styles.profileInfo}>
+           
             <Text style={styles.profileName}>GoCart</Text>
-          </View>
-            <View>
-            {status ? 
-                <Button  title={"ONLINE"}  style={{ backgroundColor: "#42E100", width:100 }}
-                    onLongPress={async ()=>(  
-                        //updateCustomer(id, false),
-                        await updateVendorStatus(id, false),
-                        ToastAndroid.show('The Staus has been updated to OFFLINE', ToastAndroid.SHORT)
-                    )}
-                />
-                  :
-                <Button  title={"OFFLINE"}  style={{ backgroundColor: "#F44336", width:100 }}
-                    onLongPress={async()=>(
-
-                       // updateCustomer(id, true),
-                       await updateVendorStatus(id, true),
-                        ToastAndroid.show('The Staus has been updated to ONLINE', ToastAndroid.SHORT)
-                    )}
-                />
-                }
-            </View>
+            
+            
         </View>
 
         <View style={styles.tab} >
@@ -166,23 +149,25 @@ const styles = StyleSheet.create({
         flex: 1,
         backgroundColor: 'white',
       },
-    headerSection: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        paddingLeft: 20,
-        paddingRight: 20,
-        justifyContent:'space-between',
+      headerSection: {
         height: '12%',
         backgroundColor: '#9ACBD0',
+        flexDirection: 'row',
+        alignItems: 'center',
+        paddingHorizontal: 20,
+        position: 'relative',
       },
-      profileInfo: {
-        marginLeft: 15,
-      },
+      
       profileName: {
+        position: 'absolute',
+        left: 0,
+        right: 0,
+        textAlign: 'center',
         fontSize: 20,
         fontWeight: 'bold',
         color: 'white',
       },
+      
       tab:{
         flexDirection: 'row',
         justifyContent:'space-around',
