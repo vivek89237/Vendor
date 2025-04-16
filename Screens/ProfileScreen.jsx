@@ -20,11 +20,7 @@ export default function ProfileScreen() {
   // })
   const [vendor, setVendor ] = useState({})
 
-  const [newValue, setNewValue] = useState({
-    contact: vendor?.ContactNo,
-    image: vendor?.image,
-    name: vendor?.name
-  });
+  const [newValue, setNewValue] = useState('');
 
   useEffect(()=>{
     fetchCustomer(id, setVendor)
@@ -34,11 +30,11 @@ export default function ProfileScreen() {
     setModalVisible(false);
     try {
       if(fieldToUpdate === 'name'){
-        await updateVendor(id, { name:vendor?.name })
+        await updateVendor(id, { name:newValue })
       }
      
       if(fieldToUpdate === 'contact'){
-        await updateVendor(id, {ContactNo: Number(vendor?.ContactNo)})
+        await updateVendor(id, {ContactNo: Number(newValue)})
       }
       
       setFieldToUpdate('');
@@ -72,7 +68,7 @@ export default function ProfileScreen() {
             description="Update name"
             left={() => <List.Icon icon="account" />}
             onPress={() => {
-              setNewValue(name)
+              setNewValue(vendor?.name)
               setFieldToUpdate('name');
               setModalVisible(true);
             }}
@@ -83,7 +79,7 @@ export default function ProfileScreen() {
             description="Update number"
             left={() => <List.Icon icon="phone" />}
             onPress={() => {
-              setNewValue(contact + '');
+              setNewValue(vendor?.ContactNo + '');
               setFieldToUpdate('contact');
               setModalVisible(true);
             }}
