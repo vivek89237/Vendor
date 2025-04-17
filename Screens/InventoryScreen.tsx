@@ -11,6 +11,17 @@ import {
   ActivityIndicator,
   Alert,
 } from 'react-native';
+import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
+import {
+  faSearch,
+  faHome,
+  faShoppingBag,
+  faHeart,
+  faUser,
+  faTrash,
+  faTag,
+  faPlus,
+} from '@fortawesome/free-solid-svg-icons';
 import { Button } from '~/components/Button'
 import { firestore } from "../utils/firebaseConfig";
 import { collection, query, where, getDocs, updateDoc, arrayUnion, onSnapshot } from "firebase/firestore";
@@ -33,9 +44,14 @@ const InventoryScreen: React.FC = () => {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [selectedVegetable, setSelectedVegetable] = useState<InventoryItem | null>(null);
   const [price, setPrice] = useState('');
+  const [quantity, setQuantity] = useState('');
   const [unit, setUnit] = useState('');
   const [loading, setLoading] = useState(false); // Loader state
   const [searchQuery, setSearchQuery] = useState(''); // Search query state
+  const [products, setProducts] = useState<InventoryItem[]>([]);
+  const [selectedItem, setSelectedItem] = useState(null);
+  const [priceModalVisible, setPriceModalVisible] = useState(false);
+  const [quantityModalVisible, setQuantityModalVisible] = useState(false);
 
   useEffect(() => {
     const loadInventory = async () => {
@@ -189,7 +205,8 @@ const InventoryScreen: React.FC = () => {
           const vegetableData = {
             id: selectedVegetable.id ?? "unknown-id", 
             name: selectedVegetable.vegetable ?? "unknown-name", 
-            price: price ?? 0, 
+            price: price ?? 0,
+            quantity: quantity ?? 0,
             unit: unit ?? "unknown-unit", 
             image: selectedVegetable.image ?? "",
           };
@@ -217,28 +234,176 @@ const InventoryScreen: React.FC = () => {
       }
     }
   };
+
+  const handleUpdatePrice = (item) => {
+    setSelectedItem(item);
+    setPriceModalVisible(true);
+  };
+
+  const handleSavePrice = (id, newPrice) => {
+    setProducts(products.map((item) =>
+      item.id === id ? { ...item, price: newPrice } : item
+    ));
+  };
+
+  const handleUpdateQuantity = (item) => {
+    setSelectedItem(item);
+    setQuantityModalVisible(true);
+  };
+
+  const handleSaveQuantity = (id, newQuantity) => {
+    setProducts(products.map((item) =>
+      item.id === id ? { ...item, quantity: newQuantity } : item
+    ));
+  };
+
+  const handleRemove = (item) => {
+    Alert.alert(
+      'Confirm Removal',
+      `Do you want to Remove this ${item.name}?`,
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Remove',
+          onPress: () => {
+            setProducts(products.filter(product => product.id !== item.id));
+          },
+          style: 'destructive',
+        },
+      ],
+      { cancelable: true }
+    );
+  };
   
-
-  const renderInventoryItem = ({ item }: { item: InventoryItem }) => (
-    <View style={styles.card}>
-      <Image source={{ uri: item.image }} style={styles.cardImage} />
-      <View style={styles.cardInfo}>
-        <Text style={styles.cardTitle}>{item.vegetable}</Text>
-        <View style={styles.priceRow}>
-          <TextInput
-            style={styles.priceInput}
-            placeholder="Enter Price"
-            keyboardType="numeric"
-            value={item.price}
-            onChangeText={(text) => updatePrice(item.id, text)}
-          />
-          <Text style={styles.unitText}> / {item.unit} </Text>
+  const PriceUpdateModal = ({ visible, item, onClose, onUpdate }) => {
+    // const [newPrice, setNewPrice] = useState(item ? item.price.replace('$', '') : '');
+  
+    const handleUpdate = () => {
+      if (price && !isNaN(parseFloat(price))) {
+        onUpdate(item.id, `$${price}`);
+        onClose();
+      } else {
+        Alert.alert('Invalid Price', 'Please enter a valid price');
+      }
+    };
+  
+    return (
+      <Modal
+        visible={visible}
+        transparent={true}
+        animationType="slide"
+        onRequestClose={onClose}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <Text style={styles.modalTitle}>Update Price for {item ? item.name : ''}</Text>
+            <TextInput
+              style={styles.modalInput}
+              placeholder="Enter new price"
+              keyboardType="decimal-pad"
+              value={price}
+              onChangeText={setPrice}
+              autoFocus
+            />
+            <View style={styles.modalButtons}>
+              <TouchableOpacity style={styles.cancelButton} onPress={onClose}>
+                <Text style={styles.buttonText}>Cancel</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.updateButton} onPress={updatePrice(item?.id, price)}>
+                <Text style={styles.buttonText}>Update</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
         </View>
-        <Button title="Remove" onPress={() => confirmRemoveVegetable(item.id)} style={{backgroundColor:"red"}} />
-      </View>
-    </View>
-  );
+      </Modal>
+    );
+  };
+  
+  // Component for quantity update modal
+  const QuantityUpdateModal = ({ visible, item, onClose, onUpdate }) => {
+   
+  
+    const handleUpdate = () => {
+      const newQuantity = parseFloat(quantity);
+      if (newQuantity && !isNaN(newQuantity) && newQuantity > 0) {
+        onUpdate(item.id, newQuantity);
+        onClose();
+      } else {
+        Alert.alert('Invalid Quantity', 'Please enter a valid quantity');
+      }
+    };
+  
+    return (
+      <Modal
+        visible={visible}
+        transparent={true}
+        animationType="slide"
+        onRequestClose={onClose}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <Text style={styles.modalTitle}>Update Quantity for {item ? item.name : ''}</Text>
+            <TextInput
+              style={styles.modalInput}
+              placeholder="Enter new quantity"
+              keyboardType="number-pad"
+              value={quantity}
+              onChangeText={setQuantity}
+              autoFocus
+            />
+            <View style={styles.modalButtons}>
+              <TouchableOpacity style={styles.cancelButton} onPress={onClose}>
+                <Text style={styles.buttonText}>Cancel</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.updateButton} onPress={handleUpdate}>
+                <Text style={styles.buttonText}>Update</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
+    );
+  };
 
+  const renderInventoryItem = ({ item }: { item: InventoryItem }) => {
+    return (
+      <View style={styles.card}>
+        <Image
+          source={{ uri: item.image }}
+          style={styles.productImage}
+          accessibilityLabel={item?.alt}
+        />
+        <View style={styles.productDetails}>
+          <Text style={styles.productName}>
+            {item?.name} <Text style={styles.productUnit}>{item?.unit}</Text>
+          </Text>
+          <Text style={styles.price}>{item.price}</Text>
+          <Text style={styles.quantity}>Quantity: {item?.quantity}</Text>
+        </View>
+        <View style={styles.buttonContainer}>
+          <TouchableOpacity
+            style={styles.priceButton}
+            onPress={() => handleUpdatePrice(item)} // update price handler
+          >
+            <FontAwesomeIcon icon={faTag} size={14} color="white" />
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.quantityButton}
+            onPress={() => handleUpdateQuantity(item)} // update quantity handler
+          >
+            <FontAwesomeIcon icon={faPlus} size={14} color="white" />
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.removeButton}
+            onPress={() => confirmRemoveVegetable(item?.id)} // remove item handler
+          >
+            <FontAwesomeIcon icon={faTrash} size={14} color="white" />
+          </TouchableOpacity>
+        </View>
+      </View>
+    );
+  };
+  
   const renderVegetableOption = ({ item }: { item: InventoryItem }) => (
     <TouchableOpacity onPress={() => { setSelectedVegetable(item); setUnit(item.unit); }}>
       <View style={styles.vegetableOption}>
@@ -310,6 +475,16 @@ const InventoryScreen: React.FC = () => {
                   />
                   <Text style={styles.unitText}> {unit} </Text>
                 </View>
+                <View style={styles.priceRow}>
+                  <TextInput
+                    style={styles.priceInput}
+                    placeholder="Enter Quantity (Rs)"
+                    keyboardType="numeric"
+                    value={quantity}
+                    onChangeText={setQuantity}
+                  />
+                  <Text style={styles.unitText}> {unit} </Text>
+                </View>
                 <View style={styles.modalButtonList}>
                   <Button title="Add to Inventory" onPress={addVegetableToInventory} />
                   <Button title="Cancel" onPress={() => setIsModalVisible(false)} />
@@ -320,6 +495,29 @@ const InventoryScreen: React.FC = () => {
           </View>
         </View>
       </Modal>
+      {selectedItem && (
+        <>
+          <PriceUpdateModal
+            visible={priceModalVisible}
+            item={selectedItem}
+            onClose={() => {
+              setPriceModalVisible(false);
+              setSelectedItem(null);
+            }}
+            onUpdate={handleSavePrice}
+          />
+          
+          <QuantityUpdateModal
+            visible={quantityModalVisible}
+            item={selectedItem}
+            onClose={() => {
+              setQuantityModalVisible(false);
+              setSelectedItem(null);
+            }}
+            onUpdate={handleSaveQuantity}
+          />
+        </>
+      )}
     </View>
   );
 };
@@ -339,17 +537,69 @@ const styles = StyleSheet.create({
   cardList: { 
     paddingVertical: 10 
   },
-  card: { 
-    flexDirection: 'column', 
-    backgroundColor: '#fff', 
-    borderRadius: 10, 
-    marginBottom: 15, 
-    padding: 20, 
-    shadowColor: '#000', 
-    shadowOpacity: 0.1, 
-    shadowOffset: { width: 0, height: 2 }, 
-    shadowRadius: 5, 
-    alignItems: 'center' 
+  card: {
+    flexDirection: 'row',
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    padding: 12,
+    marginVertical: 8,
+    marginHorizontal: 16,
+    alignItems: 'center',
+    elevation: 3,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+  },
+  productImage: {
+    width: 60,
+    height: 60,
+    borderRadius: 10,
+    marginRight: 12,
+  },
+  productDetails: {
+    flex: 1,
+  },
+  productName: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#333',
+  },
+  productUnit: {
+    fontSize: 14,
+    color: '#666',
+  },
+  price: {
+    fontSize: 14,
+    color: '#4CAF50',
+    marginTop: 2,
+  },
+  quantity: {
+    fontSize: 14,
+    color: '#555',
+    marginTop: 2,
+  },
+  buttonContainer: {
+    flexDirection: 'column',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginLeft: 10,
+    gap: 6, // optional: or use marginBottom in buttons below
+  },
+  priceButton: {
+    backgroundColor: '#4CAF50',
+    padding: 6,
+    borderRadius: 6,
+  },
+  quantityButton: {
+    backgroundColor: '#2196F3',
+    padding: 6,
+    borderRadius: 6,
+  },
+  removeButton: {
+    backgroundColor: '#F44336',
+    padding: 6,
+    borderRadius: 6,
   },
   cardImage: { 
     width: 100, 
@@ -433,9 +683,56 @@ const styles = StyleSheet.create({
   text: { 
     fontSize: 16 
   },
-  buttonContainer: { 
-    marginBottom: 20 
-  }
+
+
+// Modal styles
+modalOverlay: {
+  flex: 1,
+  backgroundColor: 'rgba(0,0,0,0.5)',
+  justifyContent: 'center',
+  alignItems: 'center',
+  padding: 20,
+},
+
+modalTitle: {
+  fontSize: 18,
+  fontWeight: '600',
+  color: '#3B7A57',
+  marginBottom: 16,
+},
+modalInput: {
+  borderWidth: 1,
+  borderColor: '#D1D5DB',
+  borderRadius: 8,
+  padding: 12,
+  fontSize: 16,
+  marginBottom: 20,
+},
+modalButtons: {
+  flexDirection: 'row',
+  justifyContent: 'space-between',
+},
+cancelButton: {
+  backgroundColor: '#9CA3AF',
+  paddingVertical: 12,
+  paddingHorizontal: 24,
+  borderRadius: 8,
+  width: '48%',
+  alignItems: 'center',
+},
+updateButton: {
+  backgroundColor: '#3B7A57',
+  paddingVertical: 12,
+  paddingHorizontal: 24,
+  borderRadius: 8,
+  width: '48%',
+  alignItems: 'center',
+},
+buttonText: {
+  color: 'white',
+  fontWeight: '600',
+  fontSize: 16,
+},
 });
 
 export default InventoryScreen;
