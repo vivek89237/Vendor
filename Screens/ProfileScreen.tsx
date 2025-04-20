@@ -1,18 +1,25 @@
 import { useEffect, useState } from 'react';
 import { Button } from '~/components/Button';
-import { View, Text, StyleSheet, ScrollView, Switch, Image, TextInput, Modal, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, Switch, Image, TextInput, Modal, TouchableOpacity, ToastAndroid } from 'react-native';
 import { List, Divider, Avatar } from 'react-native-paper';
 import { supabase } from '~/utils/supabaseConfig';
 import { useCustomer } from '~/Provider/CustomerProvider';
 import { updateVendor } from '~/utils/Firebase';
 import { useAuth } from '~/Provider/AuthProvider';
 import { updateVendorStatus, fetchCustomer } from '~/utils/Firebase';
+import{ Feather, FontAwesome, MaterialIcons, Entypo, FontAwesome5, AntDesign } from '@expo/vector-icons';
+
+
+enum TabType{
+  HANDCART='HANDCART',
+  VEHICLE='VEHICLE',
+}
 
 export default function ProfileScreen() {
   const { userId: id } = useAuth()
   const [modalVisible, setModalVisible] = useState(false);
   const [fieldToUpdate, setFieldToUpdate] = useState('');
-
+  const [modal2Visible, setModal2Visible] = useState(false)
   const [vendor, setVendor ] = useState({})
 
   const [newValue, setNewValue] = useState('');
@@ -23,13 +30,18 @@ export default function ProfileScreen() {
 
   const handleUpdate = async () => {
     setModalVisible(false);
+    setModal2Visible(false);
     try {
       if(fieldToUpdate === 'name'){
-        await updateVendor(id, { name:newValue })
+        await updateVendor(id, { name: newValue })
       }
      
       if(fieldToUpdate === 'contact'){
         await updateVendor(id, {ContactNo: Number(newValue)})
+      }
+
+      if(fieldToUpdate === 'type'){
+        await updateVendor(id, {type: newValue})
       }
       
       setFieldToUpdate('');
@@ -94,6 +106,17 @@ export default function ProfileScreen() {
           />
           <Divider />
           <List.Item
+            title={vendor?.type}
+            description="Update vehicle type"
+            left={() => <List.Icon icon="phone" />}
+            onPress={() => {
+              setNewValue(vendor?.type + '');
+              setFieldToUpdate('type');
+              setModal2Visible(true);
+            }}
+          />
+          <Divider />
+          <List.Item
             title="Logout"
             left={() => <List.Icon icon="logout" />}
             onPress={() => supabase.auth.signOut()}
@@ -122,6 +145,45 @@ export default function ProfileScreen() {
               <TouchableOpacity
                 style={[styles.modalButton, styles.cancelButton]}
                 onPress={() => setModalVisible(false)}
+              >
+                <Text style={styles.buttonText}>Cancel</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.modalButton, styles.updateButton]}
+                onPress={handleUpdate}
+              >
+                <Text style={styles.buttonText}>Update</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
+
+      <Modal
+        animationType="fade"
+        transparent={true}
+        visible={modal2Visible}
+        onRequestClose={() => setModal2Visible(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContainer}>
+            <Text style={styles.modalTitle}>Update {fieldToUpdate}</Text>
+              <View style={styles.tab} >
+                        <View>
+                          <TouchableOpacity style={styles.button} onPress={() => setNewValue(TabType.HANDCART)}>
+                            <FontAwesome5 name="walking" size={30} color={newValue === TabType.HANDCART ? "#51829B" : "#89A8B2"} /> 
+                          </TouchableOpacity>
+                        </View>
+                        <View>
+                          <TouchableOpacity style={styles.button} onPress={() => setNewValue(TabType.VEHICLE)}>
+                            <FontAwesome5 name="car-side" size={30} color={newValue === TabType.VEHICLE ? "#51829B" : "#89A8B2"} /> 
+                          </TouchableOpacity>
+                        </View>
+              </View>
+            <View style={styles.modalButtonContainer}>
+              <TouchableOpacity
+                style={[styles.modalButton, styles.cancelButton]}
+                onPress={() => setModal2Visible(false)}
               >
                 <Text style={styles.buttonText}>Cancel</Text>
               </TouchableOpacity>
@@ -180,6 +242,21 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     shadowOffset: { width: 0, height: 2 },
     elevation: 5,
+  },
+  tab:{
+    flexDirection: 'row',
+    justifyContent:'space-around',
+    paddingVertical: 10,
+    paddingHorizontal: 10,
+    gap:20,
+  },
+  button:{
+    backgroundColor: '#BDDDE4',
+    borderRadius: 20,
+    width: 60,
+    height: 50,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   modalTitle: {
     fontSize: 20,

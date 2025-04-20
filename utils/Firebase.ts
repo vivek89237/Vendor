@@ -7,7 +7,9 @@ import {
     updateDoc,
     query, 
     where, 
-    deleteDoc 
+    deleteDoc,
+    getDocs,
+    increment 
 } from 'firebase/firestore';
 
 export const STATUS = {
@@ -51,7 +53,7 @@ interface Vendor{
     image: string,
 }
   
-export const getOrders = async (id: string, setOrders, status:string[]) =>{
+export const getOrders = async (id: string, setOrders:any, status:string[]) =>{
     try{
         let ordersQuery = query(ordersRef,  where('status','in', status), where('id','==',id));
         onSnapshot(ordersQuery, (response) =>{   
@@ -83,7 +85,7 @@ export const updateLocation = async (latitude:number, longitude:number, id:strin
     }
 }
 
-export const fetchInventory = async (id:string, setInventory) =>{
+export const fetchInventory = async (id:string, setInventory:any) =>{
     try{
         let inventoryQuery = query(vendorsRef, where('id','==',id));
        return onSnapshot(inventoryQuery, (response) =>{   
@@ -106,7 +108,7 @@ export const updateVendorStatus = async (id: string, status:boolean) =>{
     }
 }
 
-export const fetchCustomer = async (id:string, setVendors)=>{
+export const fetchCustomer = async (id:string, setVendors:any)=>{
     try{
         const userDocRef = query(vendorsRef, where('id','==',id));
         onSnapshot(userDocRef, (response) =>{   
@@ -127,4 +129,17 @@ export const updateVendor = async (id: string, data: any) =>{
       } catch (e) { 
         return e;
       }
+}
+
+export const updateAcceptedOrders = async (id:string) =>{
+    const vendorRef = doc(firestore,  Ref.VENDORS, id);
+
+    try {
+      await updateDoc(vendorRef, {
+        totalDelivery: 4
+      });
+      console.log(`totalDelivery updated by 1`);
+    } catch (error) {
+      console.error("Error updating field:", error);
+    }
 }

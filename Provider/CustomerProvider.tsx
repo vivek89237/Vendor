@@ -7,9 +7,10 @@ const CustomerContext = createContext({});
 interface Vendor{
   id: string
   name: string
-  contactNo: number
+  ContactNo: number
   image: string
   status: boolean  
+  type: string
  
 }
 export default function CustomerProvider ({children} : PropsWithChildren) {
@@ -27,7 +28,8 @@ export default function CustomerProvider ({children} : PropsWithChildren) {
       name: vendor?.name, 
       contact: vendor?.ContactNo,  
       image: vendor?.image,
-      status : vendor?.status
+      status : vendor?.status,
+      type: vendor?.type
       }}>
         {children}
     </CustomerContext.Provider>

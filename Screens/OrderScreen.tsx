@@ -13,6 +13,8 @@ import { useCustomer } from "~/Provider/CustomerProvider";
 import OrderStatusDropdown from '~/components/OrderStatusDropdown '
 import {Button} from '~/components/Button'
 import { useAuth } from "~/Provider/AuthProvider";
+import { useRouter } from 'expo-router';
+import { useOrder } from "~/components/OrderProvider";
 
 interface CartItem {
   id: number;
@@ -34,6 +36,8 @@ interface Order {
 }
 
 const OrderScreen: React.FC = () => {
+  const router = useRouter();
+  const {setSelectedOrder} = useOrder()
   const [orders, setOrders] = useState<Order[]>([]);
   const [filteredOrders, setFilteredOrders] = useState<Order[]>([]);
   const [selectedStatus, setSelectedStatus] = useState<string>(STATUS.PENDING);
@@ -79,6 +83,15 @@ const OrderScreen: React.FC = () => {
       </View>
       {item.status === STATUS.PENDING && (
         <View style={styles.buttonContainer}>
+          <Button title="Location" onPress={() => {
+              setSelectedOrder(item)
+              router.push({
+                pathname:'/(home)/Map',
+              }) 
+            }
+          } 
+
+          style={{backgroundColor:"#1F7D53"}} />
           <Button title="Accept" onPress={() => updateStatus(item.id, STATUS.ACCEPTED)} style={{backgroundColor:"#1F7D53"}} />
           <Button title="Reject" onPress={() => updateStatus(item.id, STATUS.REJECTED)} style={{backgroundColor:"#BF3131"}} />
         </View>

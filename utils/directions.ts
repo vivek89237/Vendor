@@ -13,11 +13,12 @@ interface DirectionsResponse {
 
 export async function getDirections(
   from: [number, number], 
-  to: [number, number]
+  to: [number, number],
+  type: string
 ): Promise<DirectionsResponse | null> {
   try {
     const response = await fetch(
-      `${BASE_URL}/directions/v5/mapbox/walking/${from[0]},${from[1]};${to[0]},${to[1]}?alternatives=false&annotations=distance,duration&continue_straight=true&geometries=geojson&overview=full&steps=false&access_token=${process.env.EXPO_PUBLIC_MAPBOX_KEY}`
+      `${BASE_URL}/directions/v5/mapbox/${type}/${from[0]},${from[1]};${to[0]},${to[1]}?alternatives=false&annotations=distance,duration&continue_straight=true&geometries=geojson&overview=full&steps=false&access_token=${process.env.EXPO_PUBLIC_MAPBOX_KEY}`
     );
 
     if (!response.ok) {

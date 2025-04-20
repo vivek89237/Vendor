@@ -28,7 +28,7 @@ const Map = () => {
   };
 
   useEffect(() => {
-    getOrders(id, setOrders, [STATUS.ACCEPTED]);
+    getOrders(id, setOrders, [STATUS.ACCEPTED, STATUS.PENDING]);
   }, []);
 
     return (
@@ -38,7 +38,7 @@ const Map = () => {
           <Camera followZoomLevel={10} followUserLocation />
           <LocationPuck puckBearingEnabled puckBearing="heading" pulsing={{ isEnabled: true }} />
           <ShowOrder onPointPress={onPointPress} ordersFeatures={ordersFeatures} />
-          {directionCoordinate && selectedOrder?.status === STATUS.ACCEPTED && <LineRoute coordinates={directionCoordinate} />}
+          {directionCoordinate && [STATUS.ACCEPTED, STATUS.PENDING].includes(selectedOrder?.status) && <LineRoute coordinates={directionCoordinate} />}
         </MapView>
       </View>
     );
