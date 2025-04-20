@@ -1,23 +1,29 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useCallback } from 'react';
 import { Text, View, Alert, Linking  } from 'react-native';
 import { Button } from './Button';
 import { FontAwesome6, Ionicons, FontAwesome5 } from '@expo/vector-icons';
 import BottomSheet, { BottomSheetView } from '@gorhom/bottom-sheet';
 import { useOrder } from './OrderProvider';
-import { updateStatus, STATUS } from '~/utils/Firebase';
+import { updateStatus, STATUS, updateAcceptedOrders } from '~/utils/Firebase';
 import { Avatar } from 'react-native-paper';
+import { useAuth } from '~/Provider/AuthProvider';
 
 const image = "https://zfcmfksnxyzfgrbhxsts.supabase.co/storage/v1/object/sign/userdummyimage/customerImage.webp?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1cmwiOiJ1c2VyZHVtbXlpbWFnZS9jdXN0b21lckltYWdlLndlYnAiLCJpYXQiOjE3NDIzMTgxNjYsImV4cCI6MTc3Mzg1NDE2Nn0.KcsjwoUZTWOxcw8M1Kvx-sV4bYMCnoyVvBWgYPUYLzA"
 
 export default function SelectedOrderSheet() {
     const bottomSheetRef = useRef<BottomSheet>(null);
     const { selectedOrder, routeTime, routeDistance, setSelectedOrder, setDirection } = useOrder();
-    
+    const { id } = useAuth()
     useEffect(() => {
         if (selectedOrder) {
             bottomSheetRef.current?.expand();
         }
     },[selectedOrder])
+    const handleSheetChange = useCallback((index) => {
+        if (index === -1) {
+          setSelectedOrder(null);
+        }
+      }, []);
    
     return (
         <>
@@ -26,6 +32,7 @@ export default function SelectedOrderSheet() {
                 index={-1}
                 snapPoints={[200]}
                 enablePanDownToClose
+                onChange={handleSheetChange}
                 backgroundStyle={{ backgroundColor: "#414442" }}
             >
                 <BottomSheetView style={{ flex: 1, padding: 15 }}>
@@ -77,6 +84,7 @@ export default function SelectedOrderSheet() {
                                     text: "Yes",
                                     onPress: async() => {
                                         await updateStatus(selectedOrder.id, STATUS.DELIVERED)
+                                        await updateAcceptedOrders(id)
                                         bottomSheetRef.current?.close()
                                         setDirection(null)
                                         setSelectedOrder(null)
