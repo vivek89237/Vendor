@@ -123,6 +123,7 @@ export default function Auth() {
             name: "Name",
             ContactNo: Number(phoneNumber),
             status: false,
+            type: 'HANDCART' ,
             image: "https://zfcmfksnxyzfgrbhxsts.supabase.co/storage/v1/object/sign/userdummyimage/customerImage.webp?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1cmwiOiJ1c2VyZHVtbXlpbWFnZS9jdXN0b21lckltYWdlLndlYnAiLCJpYXQiOjE3NDIzMTgxNjYsImV4cCI6MTc3Mzg1NDE2Nn0.KcsjwoUZTWOxcw8M1Kvx-sV4bYMCnoyVvBWgYPUYLzA",
             latitude: location?.latitude,
             longitude:location?.longitude,

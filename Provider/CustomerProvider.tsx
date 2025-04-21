@@ -11,6 +11,7 @@ interface Vendor{
   image: string
   status: boolean  
   type: string
+  totalDelivery: number
  
 }
 export default function CustomerProvider ({children} : PropsWithChildren) {
@@ -29,7 +30,8 @@ export default function CustomerProvider ({children} : PropsWithChildren) {
       contact: vendor?.ContactNo,  
       image: vendor?.image,
       status : vendor?.status,
-      type: vendor?.type
+      type: vendor?.type,
+      totalDelivery: vendor?.totalDelivery
       }}>
         {children}
     </CustomerContext.Provider>
