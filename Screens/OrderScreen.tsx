@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef  } from "react";
 import {
   View,
   Text,
@@ -6,34 +6,16 @@ import {
   FlatList,
   StyleSheet,
   TouchableOpacity,
-  ScrollView
+  ScrollView,
+  Animated,
 } from "react-native";
-import { getOrders, STATUS, updateStatus } from "~/utils/Firebase";
+import { getOrders, STATUS, updateStatus, updateOrder, Order, getScheduledOrders } from "~/utils/Firebase";
 import { useCustomer } from "~/Provider/CustomerProvider";
 import OrderStatusDropdown from '~/components/OrderStatusDropdown '
 import {Button} from '~/components/Button'
-import { useAuth } from "~/Provider/AuthProvider";
 import { useRouter } from 'expo-router';
 import { useOrder } from "~/components/OrderProvider";
-
-interface CartItem {
-  id: number;
-  name: string;
-  price: string;
-  quantity: number;
-  unit?: string
-}
-
-interface Order {
-  id: string;
-  VendorName: string;
-  cart: CartItem[];
-  date: string;
-  location: string;
-  status: string;
-  total: number;
-  customerContact: number;
-}
+import { FontAwesome6, Ionicons, FontAwesome5, AntDesign } from '@expo/vector-icons';
 
 const OrderScreen: React.FC = () => {
   const router = useRouter();
@@ -41,7 +23,27 @@ const OrderScreen: React.FC = () => {
   const [orders, setOrders] = useState<Order[]>([]);
   const [filteredOrders, setFilteredOrders] = useState<Order[]>([]);
   const [selectedStatus, setSelectedStatus] = useState<string>(STATUS.PENDING);
-  const {userId: id} = useAuth()
+  const [scheduled, setScheduled] = useState(false)
+  const [scheduledOrders, setScheduledOrders] = useState<Order[]>([]);
+  const { id, totalDelivery } = useCustomer()
+
+
+  const scale = useRef(new Animated.Value(1)).current;
+
+  const handlePress = () => {
+    Animated.sequence([
+      Animated.spring(scale, {
+        toValue: 1.3,
+        useNativeDriver: true,
+      }),
+      Animated.spring(scale, {
+        toValue: 1,
+        useNativeDriver: true,
+      }),
+    ]).start(() => {
+      setScheduled(true);
+    });
+  };
 
   useEffect(() => {
     const fetchOrders = async () => {
@@ -51,15 +53,17 @@ const OrderScreen: React.FC = () => {
         STATUS.DELIVERED,
         STATUS.PENDING,
         STATUS.REJECTED,
-        
       ]);
+
+      await getScheduledOrders(id, setScheduledOrders)
     };
     fetchOrders();
   }, []);
 
   useEffect(() => {
-    setFilteredOrders(orders.filter((order) => order.status === selectedStatus));
+    setFilteredOrders(orders.filter((order) => order.status === selectedStatus && !order?.isScheduled ));
   }, [selectedStatus, orders]);
+  
 
   const trackOrder = (id: string) => {
     Alert.alert("Track Order", `Tracking information for Order ID: ${id}`);
@@ -76,7 +80,7 @@ const OrderScreen: React.FC = () => {
           <Text style={styles.sectionTitle}>Order Items:</Text>
           {item?.cart?.map((orderItem, index) => (
             <Text key={index} style={styles.itemText}>
-              {orderItem.quantity} Kg {orderItem.name}
+              {orderItem?.quantity} {orderItem?.unit} {orderItem?.name}
             </Text>
           ))}
         </ScrollView>
@@ -99,9 +103,50 @@ const OrderScreen: React.FC = () => {
 
       {item.status === STATUS.ACCEPTED && (
         <View style={styles.trackContainer}>
-          <Button title="Track Order" onPress={() => trackOrder(item.id)} style={{backgroundColor:"#98D2C0"}} />
+          <Button title="Track Order" onPress={() =>  {
+              setSelectedOrder(item)
+              router.push({
+                pathname:'/(home)/Map',
+              }) 
+            }} style={{backgroundColor:"#98D2C0"}} />
         </View>
       )}
+    </View>
+  );
+
+  const renderOrderScheduled = ({ item }: { item: Order }) => (
+    item?.isScheduled &&
+    <View style={[styles.orderContainer, {borderLeftColor: '#FF0B55'}]}>
+      <Text style={styles.vendorName}>{item.customerContact}</Text>
+      <Text style={styles.text}><Text style={styles.boldText}>Location:</Text> {item.location}</Text>
+      <Text style={styles.text}><Text style={styles.boldText}>Date:</Text> {item.date}</Text>
+      <Text style={styles.totalPrice}>₹{item.total}</Text>
+      <View>
+      <ScrollView style={styles.itemsContainer}>
+          <Text style={styles.sectionTitle}>Order Items:</Text>
+          {item?.cart?.map((orderItem, index) => (
+            <Text key={index} style={styles.itemText}>
+              {orderItem?.quantity} {orderItem?.unit} {orderItem?.name}
+            </Text>
+          ))}
+        </ScrollView>
+      </View>
+      {item.status === STATUS.PENDING && (
+        <View style={styles.buttonContainer}>
+          <Button title="Location" onPress={() => {
+              setSelectedOrder(item)
+              router.push({
+                pathname:'/(home)/Map',
+              }) 
+            }
+          } 
+
+          style={{backgroundColor:"#1F7D53"}} />
+          {!item?.isScheduledAccepted && <Button title="Accept" disabled={!item?.isScheduledAccepted} onPress={() => updateOrder(item.id, {isScheduledAccepted: true})} style={{backgroundColor:"#1F7D53"}} />}
+          <Button title="Reject" onPress={() => updateOrder(item.id, {isScheduledAccepted: false, isScheduled: false, status: STATUS.REJECTED }) } style={{backgroundColor:"#BF3131"}} />
+        </View>
+      )}
+
     </View>
   );
 
@@ -118,25 +163,58 @@ const OrderScreen: React.FC = () => {
   
   return (
     <View style={styles.container}>
-     <OrderStatusDropdown 
-      selectedStatus={selectedStatus}
-      setSelectedStatus={setSelectedStatus}
-     />
-
-
-      {filteredOrders.length === 0 ? (
-       <>
-         <Text style={{textAlign: "center", marginBottom: 5}}>No orders found.</Text>
-         <Text style={{textAlign: "center", marginBottom: 20}}>Dropdown to view Accepted orders.</Text>
-       </>
-      ) : (
-        <FlatList
-          data={filteredOrders}
-          renderItem={renderOrder}
-          showsVerticalScrollIndicator={false}
-          keyExtractor={(item) => item.id}
+      <View style={styles.header} >
+        <View style={{flex:6}} >
+        <OrderStatusDropdown 
+          selectedStatus={selectedStatus}
+          setSelectedStatus={setSelectedStatus}
+          setScheduled={setScheduled}
         />
-      )}
+        </View>
+        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+      <Animated.View style={{ transform: [{ scale }] }}>
+        <AntDesign
+          name="clockcircle"
+          size={45}
+          color="#FF0B55"
+          onPress={handlePress}
+        />
+      </Animated.View>
+    </View>
+        
+      </View>
+      {!scheduled ? 
+        <>
+          {filteredOrders.length === 0 ? (
+          <>
+            <Text style={{textAlign: "center", marginBottom: 5}}>No orders found.</Text>
+            <Text style={{textAlign: "center", marginBottom: 20}}>Dropdown to view Accepted orders.</Text>
+          </>
+          ) : (
+            <FlatList
+              data={filteredOrders}
+              renderItem={renderOrder}
+              showsVerticalScrollIndicator={false}
+              keyExtractor={(item) => item.id}
+            />
+          )}
+        </> :
+        <>
+          {scheduledOrders.length === 0 ? (
+            <>
+              <Text style={{textAlign: "center", marginBottom: 5}}>No scheduled orders found.</Text>
+              <Text style={{textAlign: "center", marginBottom: 20}}>Dropdown to view Pending orders.</Text>
+            </>
+            ) : (
+              <FlatList
+                data={scheduledOrders}
+                renderItem={renderOrderScheduled}
+                showsVerticalScrollIndicator={false}
+                keyExtractor={(item) => item.id}
+              />
+            )}
+        </>
+        }
     </View>
   );
 };
@@ -169,6 +247,12 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: "bold",
     color: "#fff",
+  },
+  header:{
+    marginVertical: 10,
+    flexDirection:'row',
+    justifyContent:'space-evenly',
+    gap:10
   },
   itemsContainer: {
     maxHeight: 150,

@@ -1,13 +1,14 @@
 import { ShapeSource, SymbolLayer, CircleLayer , Images} from "@rnmapbox/maps"
 import pin from "~/assets/pin.png";
-
-export default function ShowOrder({onPointPress, ordersFeatures}){
+import pin_red from "~/assets/pin_red.png";
+export default function ShowOrder({onPointPress, ordersFeatures}:{onPointPress:any, ordersFeatures:any}){
     return(
         <ShapeSource 
           id="scooters" 
           cluster
           onPress={onPointPress}
           shape={ordersFeatures} 
+         
         >
           <SymbolLayer
             id="clusters-coount"
@@ -21,7 +22,6 @@ export default function ShowOrder({onPointPress, ordersFeatures}){
           </SymbolLayer>
           <CircleLayer
             id="clusters"
-           
             filter={['has', 'point_count']}
             style={{
               circleColor : '#42E100',
@@ -41,7 +41,7 @@ export default function ShowOrder({onPointPress, ordersFeatures}){
               iconAnchor : 'bottom'
             }} 
           />
-          <Images images={{pin}}  />
+          <Images images={ {pin} }  />
         </ShapeSource>
     )
 }

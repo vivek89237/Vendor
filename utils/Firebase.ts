@@ -9,7 +9,7 @@ import {
     where, 
     deleteDoc,
     getDocs,
-    increment 
+    increment,
 } from 'firebase/firestore';
 
 export const STATUS = {
@@ -20,7 +20,6 @@ export const STATUS = {
     REJECTED: "Rejected",
   }
 
-
 const Ref = {
     ORDERS : "orders",
     VENDORS: "vendors",
@@ -28,23 +27,26 @@ const Ref = {
 let ordersRef = collection(firestore, Ref.ORDERS);
 let vendorsRef = collection(firestore, Ref.VENDORS);
 
-interface CartItem {
-    id: number;
-    name: string;
-    price: string;
-    quantity: number;
-  }
-  
-interface Order {
-    id: string;
-    VendorName: string;
-    cart: CartItem[];
-    date: string;
-    location: string;
-    status: string;
-    total: number;
-    vendorContactNo: number;
-  }
+export interface CartItem {
+  id: number;
+  name: string;
+  price: string;
+  quantity: number;
+  unit?: string
+}
+
+export interface Order {
+  id: string;
+  VendorName: string;
+  cart: CartItem[];
+  date: string;
+  location: string;
+  status: string;
+  total: number;
+  customerContact: number;
+  isScheduled?: boolean
+  isScheduledAccepted?: boolean
+}
 
 interface Vendor{
     id?: string,
@@ -54,23 +56,78 @@ interface Vendor{
 }
   
 export const getOrders = async (id: string, setOrders:any, status:string[]) =>{
-    try{
-        let ordersQuery = query(ordersRef,  where('status','in', status), where('id','==',id));
-        onSnapshot(ordersQuery, (response) =>{   
-            let orders = response.docs.map((docs)=>{
-                return {...docs.data(), id: docs.id};
-            });
+    
+    try {
+        let ordersQuery = query(
+            ordersRef,
+            where('status', 'in', status),
+            where('id', '==', id),
+            where('isScheduled','==', false)
+        );
+
+        onSnapshot(ordersQuery, async (response) => {
+            const orders = await Promise.all(
+                response.docs.map(async (doc) => {
+                    const data = doc.data();
+                    const orderDateStr = data?.date;
+                    const [day, month, year] = orderDateStr.split('-');
+                    const orderDate = new Date(`${year}-${month}-${day}`); 
+                    const today = new Date();
+                    if( orderDate.getDate() < today.getDate() && orderDate.getMonth() === today.getMonth() && orderDate.getFullYear() === today.getFullYear() && [STATUS.ACCEPTED, STATUS.PENDING].includes(data?.status) ){
+                        await updateDoc(doc.ref, { isScheduled: false, status: STATUS.CANCELLED, isScheduledAccepted: false })
+                    }
+
+                    return { ...data, id: doc.id };
+                })
+            );
+
             setOrders(orders);
-        })
+        });
+        } catch (e) {
+            console.error(e);
+        }
+
+}
+
+export const getScheduledOrders = async (id:string, setScheduledOrders:any) =>{
+    try{
+        let ordersQuery = query(ordersRef, where('id','==',id), where('isScheduled','==', true));
+        onSnapshot(ordersQuery, async (response) => {
+            const orders = await Promise.all(
+                response.docs.map(async (doc) => {
+                    const data = doc.data();
+                    const orderDateStr = data?.date;
+                    const [day, month, year] = orderDateStr.split('-');
+                    const orderDate = new Date(`${year}-${month}-${day}`); 
+                    const today = new Date();
+                    if( orderDate.getDate() === today.getDate() && orderDate.getMonth() === today.getMonth() && orderDate.getFullYear() === today.getFullYear() && data?.isScheduled ){
+                        await updateDoc(doc.ref, { isScheduled: false, isScheduledAccepted: false })
+                    }
+
+                    return { ...data, id: doc.id };
+                })
+            );
+
+            setScheduledOrders(orders);
+        });
     }catch(e){
         return e;
     }
 }
 
-export const updateStatus = async (id: string,  status: string) => {
+export const updateStatus = async (id: string,  status: string ) => {
     try {
-      const orderRef = doc(firestore, "orders", id); // Use the document ID
-      await updateDoc(orderRef, { status: status });
+      const orderRef = doc(firestore, Ref.ORDERS, id); // Use the document ID
+        await updateDoc(orderRef, { status: status, isScheduled:false });
+    } catch (e) {
+      return e;
+    }
+}
+
+export const updateOrder = async (id: string,  data:any ) => {
+    try {
+      const orderRef = doc(firestore, Ref.ORDERS, id); // Use the document ID
+        await updateDoc(orderRef, data);
     } catch (e) {
       return e;
     }
@@ -78,7 +135,7 @@ export const updateStatus = async (id: string,  status: string) => {
 
 export const updateLocation = async (latitude:number, longitude:number, id:string) => {
     try { 
-        const userDocRef = doc(firestore, "vendors", id);
+        const userDocRef = doc(firestore, Ref.VENDORS, id);
         await updateDoc(userDocRef, { latitude, longitude});
     } catch (e) {
         return e;
@@ -124,8 +181,8 @@ export const fetchCustomer = async (id:string, setVendors:any)=>{
 
 export const updateVendor = async (id: string, data: any) =>{
     try {
-        const orderRef = doc(firestore, Ref.VENDORS, id); 
-        await updateDoc( orderRef, data );
+        const vendorRef = doc(firestore, Ref.VENDORS, id); 
+        await updateDoc( vendorRef, data );
       } catch (e) { 
         return e;
       }
@@ -143,3 +200,4 @@ export const updateAcceptedOrders = async (id:string) =>{
       console.error("Error updating field:", error);
     }
 }
+

@@ -5,8 +5,9 @@ import { Button } from "./Button";
 interface OrderStatusDropdownProps {
     selectedStatus: string;
     setSelectedStatus: (status: string) => void;
+    setScheduled: (scheduled: boolean) => void;
 }
-const OrderStatusDropdown: React.FC<OrderStatusDropdownProps> = ({ selectedStatus, setSelectedStatus }) => {
+const OrderStatusDropdown: React.FC<OrderStatusDropdownProps> = ({ selectedStatus, setSelectedStatus, setScheduled }) => {
   const [isDropdownVisible, setDropdownVisible] = useState(false);
 
   const handleSelectStatus = (status:string) => {
@@ -30,7 +31,7 @@ const OrderStatusDropdown: React.FC<OrderStatusDropdownProps> = ({ selectedStatu
     <View style={styles.dropdownContainer}>
       <Button
         title={`${selectedStatus}    ▼` || "Select Status ▼"}
-        onPress={() => setDropdownVisible(true)}
+        onPress={() => {setDropdownVisible(true), setScheduled(false)}}
         style={[styles.dropdownButton, {backgroundColor:`${getStatusColor(selectedStatus)}`}]}
       />
     
@@ -67,7 +68,7 @@ const OrderStatusDropdown: React.FC<OrderStatusDropdownProps> = ({ selectedStatu
 
 const styles = StyleSheet.create({
   dropdownContainer: {
-    marginVertical: 10,
+    
   },
   dropdownButton: {
     backgroundColor: "#6200EE",
