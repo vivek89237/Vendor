@@ -16,6 +16,7 @@ import {Button} from '~/components/Button'
 import { useRouter } from 'expo-router';
 import { useOrder } from "~/components/OrderProvider";
 import { FontAwesome6, Ionicons, FontAwesome5, AntDesign } from '@expo/vector-icons';
+import Table from "~/components/Table";
 
 const OrderScreen: React.FC = () => {
   const router = useRouter();
@@ -71,18 +72,20 @@ const OrderScreen: React.FC = () => {
 
   const renderOrder = ({ item }: { item: Order }) => (
     <View style={[styles.orderContainer, {borderLeftColor: `${getStatusColor(item.status)}`}]}>
-      <Text style={styles.vendorName}>{item.customerContact}</Text>
-      <Text style={styles.text}><Text style={styles.boldText}>Location:</Text> {item.location}</Text>
-      <Text style={styles.text}><Text style={styles.boldText}>Date:</Text> {item.date}</Text>
-      <Text style={styles.totalPrice}>₹{item.total}</Text>
+      <View style={{flexDirection: "row", justifyContent:"space-between"}}>
+        <Text style={styles.vendorName}>{item.customerContact}</Text>
+        <Text style={styles.text}>{item.date}</Text>
+      </View>
+      <View style={{flexDirection:"row", justifyContent:"flex-end"}} ><Text style={styles.text}>{item.location}</Text></View>
+      
       <View>
       <ScrollView style={styles.itemsContainer}>
-          <Text style={styles.sectionTitle}>Order Items:</Text>
-          {item?.cart?.map((orderItem, index) => (
+          {/* {item?.cart?.map((orderItem, index) => (
             <Text key={index} style={styles.itemText}>
               {orderItem?.quantity} {orderItem?.unit} {orderItem?.name}
             </Text>
-          ))}
+          ))} */}
+          <Table data={item?.cart} price={item.total} />
         </ScrollView>
       </View>
       {item.status === STATUS.PENDING && (
@@ -95,20 +98,20 @@ const OrderScreen: React.FC = () => {
             }
           } 
 
-          style={{backgroundColor:"#1F7D53"}} />
+          style={{backgroundColor:"#7AE2CF"}} />
           <Button title="Accept" onPress={() => updateStatus(item.id, STATUS.ACCEPTED)} style={{backgroundColor:"#1F7D53"}} />
           <Button title="Reject" onPress={() => updateStatus(item.id, STATUS.REJECTED)} style={{backgroundColor:"#BF3131"}} />
         </View>
       )}
 
       {item.status === STATUS.ACCEPTED && (
-        <View style={styles.trackContainer}>
+        <View style={styles.buttonContainer}>
           <Button title="Track Order" onPress={() =>  {
               setSelectedOrder(item)
               router.push({
                 pathname:'/(home)/Map',
               }) 
-            }} style={{backgroundColor:"#98D2C0"}} />
+            }} style={{backgroundColor:"#7AE2CF"}} />
         </View>
       )}
     </View>
@@ -117,23 +120,25 @@ const OrderScreen: React.FC = () => {
   const renderOrderScheduled = ({ item }: { item: Order }) => (
     item?.isScheduled &&
     <View style={[styles.orderContainer, {borderLeftColor: '#FF0B55'}]}>
-      <Text style={styles.vendorName}>{item.customerContact}</Text>
-      <Text style={styles.text}><Text style={styles.boldText}>Location:</Text> {item.location}</Text>
-      <Text style={styles.text}><Text style={styles.boldText}>Date:</Text> {item.date}</Text>
-      <Text style={styles.totalPrice}>₹{item.total}</Text>
+      <View style={{flexDirection: "row", justifyContent:"space-between"}}>
+        <Text style={styles.vendorName}>{item.customerContact}</Text>
+        <Text style={styles.text}>{item.date}</Text>
+      </View>
+      <View style={{flexDirection:"row", justifyContent:"flex-end"}} ><Text style={styles.text}>{item.location}</Text></View>
+      
       <View>
       <ScrollView style={styles.itemsContainer}>
-          <Text style={styles.sectionTitle}>Order Items:</Text>
-          {item?.cart?.map((orderItem, index) => (
+          {/* {item?.cart?.map((orderItem, index) => (
             <Text key={index} style={styles.itemText}>
               {orderItem?.quantity} {orderItem?.unit} {orderItem?.name}
             </Text>
-          ))}
+          ))} */}
+          <Table data={item?.cart} price={item.total} />
         </ScrollView>
       </View>
       {item.status === STATUS.PENDING && (
         <View style={styles.buttonContainer}>
-          <Button title="Location" onPress={() => {
+          {!item?.isScheduledAccepted && <Button title="Location"  disabled={item?.isScheduledAccepted} onPress={() => {
               setSelectedOrder(item)
               router.push({
                 pathname:'/(home)/Map',
@@ -141,8 +146,8 @@ const OrderScreen: React.FC = () => {
             }
           } 
 
-          style={{backgroundColor:"#1F7D53"}} />
-          {!item?.isScheduledAccepted && <Button title="Accept" disabled={!item?.isScheduledAccepted} onPress={() => updateOrder(item.id, {isScheduledAccepted: true})} style={{backgroundColor:"#1F7D53"}} />}
+          style={{backgroundColor:"#7AE2CF"}} />}
+          {!item?.isScheduledAccepted && <Button title="Accept" disabled={item?.isScheduledAccepted} onPress={() => updateOrder(item.id, {isScheduledAccepted: true})} style={{backgroundColor:"#1F7D53"}} />}
           <Button title="Reject" onPress={() => updateOrder(item.id, {isScheduledAccepted: false, isScheduled: false, status: STATUS.REJECTED }) } style={{backgroundColor:"#BF3131"}} />
         </View>
       )}
@@ -255,7 +260,8 @@ const styles = StyleSheet.create({
     gap:10
   },
   itemsContainer: {
-    maxHeight: 150,
+    maxHeight: 200,
+    marginTop:10,
     marginBottom: 8,
   },
   sectionTitle: {
@@ -309,7 +315,7 @@ const styles = StyleSheet.create({
     marginTop: 5,
   },
   buttonContainer: {
-    flexDirection: "column",
+    flexDirection: "row",
     gap:10,
     justifyContent: "space-between",
     marginTop: 10,
