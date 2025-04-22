@@ -5,14 +5,14 @@ import { View, Text, FlatList, StyleSheet } from 'react-native';
 const Table = ({data, price}:{data:any, price:number}) => {
 
   const renderItem = ({ item }:{item:any}) => {
-    const totat = item?.quantity*item?.price
+    const total = item?.quantity*item?.price
     return (
       <View style={styles.row}>
-        <Text style={styles.cellN}>{item?.quantity}</Text>
+        <Text style={styles.cellN}>{ item?.unit === 'g'? item?.quantity*1000 : item?.quantity}</Text>
         <Text style={styles.cell}>{item?.unit}</Text>
         <Text style={styles.cell}>{item?.name}</Text>
-        <Text style={styles.cell}>{price.toFixed(2)}</Text>
-        <Text style={styles.cell}>{price.toFixed(2)}</Text>
+        <Text style={styles.cell}>{item?.price}</Text>
+        <Text style={styles.cell}>{total.toFixed(2)}</Text>
       </View>
     );
   };
