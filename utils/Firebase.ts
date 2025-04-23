@@ -1,3 +1,4 @@
+import { ToastAndroid } from "react-native";
 import {firestore} from "./firebaseConfig";
 import { 
     addDoc, 
@@ -10,6 +11,7 @@ import {
     deleteDoc,
     getDocs,
     increment,
+    getDoc
 } from 'firebase/firestore';
 
 export const STATUS = {
@@ -201,3 +203,45 @@ export const updateAcceptedOrders = async (id:string) =>{
     }
 }
 
+
+export const updateVendorStock = async (vendorId: string, cartItems: any, op:string) => {
+  try {
+    const vendorRef = doc(firestore, "vendors", vendorId);
+    const vendorSnap = await getDoc(vendorRef);
+
+    if (!vendorSnap.exists()) {
+      console.error("Vendor not found");
+      return;
+    }
+    
+    const vendorData = vendorSnap.data();
+    const vegetables = vendorData.vegetables || [];
+
+    const updatedVegetables = vegetables.map((veg: any) => {
+      const matchingCartItem = cartItems.find(item => item.id === veg.id);
+      if (matchingCartItem) {
+        if(op === 'add'){
+            return {
+                ...veg,
+                quantity: Math.max(Number(veg?.quantity)  - Number( matchingCartItem?.quantity), 0) + "", // avoid negative quantity
+              };
+        }
+        else if(op === 'sub'){
+            return {
+                ...veg,
+                quantity: Math.max(Number(veg?.quantity) + Number( matchingCartItem?.quantity), 0) + "", // avoid negative quantity
+              };
+        }
+      }
+      return veg;
+    });
+
+    await updateDoc(vendorRef, {
+      vegetables: updatedVegetables,
+    });
+    ToastAndroid.show("Vendor stock updated successfully.", ToastAndroid.SHORT)
+
+  } catch (error) {
+    console.error("Error updating vendor stock:", error);
+  }
+};

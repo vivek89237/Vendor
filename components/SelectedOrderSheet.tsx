@@ -4,7 +4,7 @@ import { Button } from './Button';
 import { FontAwesome6, Ionicons, FontAwesome5, AntDesign } from '@expo/vector-icons';
 import BottomSheet, { BottomSheetView } from '@gorhom/bottom-sheet';
 import { useOrder } from './OrderProvider';
-import { updateStatus, STATUS, updateAcceptedOrders, updateVendor, updateOrder } from '~/utils/Firebase';
+import { updateStatus, STATUS, updateAcceptedOrders, updateVendor, updateOrder, updateVendorStock } from '~/utils/Firebase';
 import { Avatar } from 'react-native-paper';
 import { useCustomer } from '~/Provider/CustomerProvider';
 
@@ -113,6 +113,7 @@ export default function SelectedOrderSheet() {
                                     text: "Yes",
                                     onPress: async() =>{
                                          await updateStatus(selectedOrder.id, STATUS.CANCELLED)
+                                         await  updateVendorStock(id, selectedOrder?.cart, 'sub' )
                                          bottomSheetRef.current?.close()
                                          setDirection(null)
                                          setSelectedOrder(null)
@@ -130,7 +131,7 @@ export default function SelectedOrderSheet() {
                         <>
                          <Button 
                         title='Accept' 
-                        disabled={!selectedOrder?.isScheduled}
+                        disabled={selectedOrder?.isScheduled}
                         onLongPress={() =>  {
                             Alert.alert(
                                 "Acceptance Confirmation", 
@@ -140,7 +141,7 @@ export default function SelectedOrderSheet() {
                                 {
                                     text: "Yes",
                                     onPress: async() => {
-                                        selectedOrder?.isScheduled ? await updateOrder(selectedOrder.id, {isScheduledAccepted: true}) : await updateStatus(selectedOrder.id, STATUS.ACCEPTED)
+                                        selectedOrder?.isScheduled ? await updateOrder(selectedOrder.id, {isScheduledAccepted: true}) :  await  Promise.all([updateStatus(selectedOrder.id, STATUS.ACCEPTED),  updateVendorStock(id, selectedOrder?.cart, 'add' )]) 
                                         bottomSheetRef.current?.close()
                                         setDirection(null)
                                         setSelectedOrder(null)

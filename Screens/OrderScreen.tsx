@@ -9,7 +9,7 @@ import {
   ScrollView,
   Animated,
 } from "react-native";
-import { getOrders, STATUS, updateStatus, updateOrder, Order, getScheduledOrders } from "~/utils/Firebase";
+import { getOrders, STATUS, updateStatus, updateOrder, Order, getScheduledOrders, updateVendorStock } from "~/utils/Firebase";
 import { useCustomer } from "~/Provider/CustomerProvider";
 import OrderStatusDropdown from '~/components/OrderStatusDropdown '
 import {Button} from '~/components/Button'
@@ -99,7 +99,9 @@ const OrderScreen: React.FC = () => {
           } 
 
           style={{backgroundColor:"#7AE2CF"}} />
-          <Button title="Accept" onPress={() => updateStatus(item.id, STATUS.ACCEPTED)} style={{backgroundColor:"#1F7D53"}} />
+          <Button title="Accept" onPress={() =>{ 
+          updateStatus(item.id, STATUS.ACCEPTED)
+             updateVendorStock(id, item?.cart, 'add' )}} style={{backgroundColor:"#1F7D53"}} />
           <Button title="Reject" onPress={() => updateStatus(item.id, STATUS.REJECTED)} style={{backgroundColor:"#BF3131"}} />
         </View>
       )}
